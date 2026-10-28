@@ -1,31 +1,18 @@
-import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
-
-import { api } from '../services/api';
-import authReducer from '../features/auth/authSlice';
-import householdReducer from '../features/household/householdSlice';
-
-const sessionListener = createListenerMiddleware();
-sessionListener.startListening({
-  predicate: (action) =>
-    action.type === 'auth/logout' || action.type === 'auth/setCredentials',
-  effect: (_action, listener) => {
-    listener.dispatch(api.util.resetApiState());
-    listener.dispatch({ type: 'household/clearSelectedHousehold' });
-  },
-});
-
+import { configureStore } from '@reduxjs/toolkit';
+import { api } from '@/services/api';
+import authReducer from '@/features/auth/authSlice';
+import groupReducer from '@/features/groups/groupSlice';
+import { appListeners } from './listeners';
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
     auth: authReducer,
-    household: householdReducer,
+    groups: groupReducer,
   },
-
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .prepend(sessionListener.middleware)
+      .prepend(appListeners.middleware)
       .concat(api.middleware),
 });
-
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

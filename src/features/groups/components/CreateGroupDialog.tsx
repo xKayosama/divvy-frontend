@@ -1,3 +1,4 @@
+import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,17 +79,13 @@ export default function CreateGroupDialog() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="group-currency">Currency</Label>
-              <select
+              <FormSelect
                 id="group-currency"
-                className="h-10 w-full rounded-xl border bg-white px-3"
                 value={currency}
-                onChange={(event) => setCurrency(event.target.value)}
+                onValueChange={setCurrency}
                 disabled={isLoading}
-              >
-                {currencies.map((code) => (
-                  <option key={code}>{code}</option>
-                ))}
-              </select>
+                options={currencies.map((value) => ({ value, label: value }))}
+              />
               <p className="text-xs leading-5 text-muted-foreground">
                 Choose carefully. Currency can only change before the group has
                 financial activity.

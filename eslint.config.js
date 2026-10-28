@@ -19,4 +19,27 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: [
+      'src/lib/**/*.{ts,tsx}',
+      'src/services/**/*.{ts,tsx}',
+      'src/types/**/*.{ts,tsx}',
+      'src/components/ui/**/*.{ts,tsx}',
+      'src/components/brand/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/features/**', '**/features/**'],
+              message:
+                'Shared code must not depend on features. Move shared contracts to src/types or src/lib.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

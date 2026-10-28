@@ -1,9 +1,10 @@
+import type { Pagination } from '@/types/api';
+import type { UserSummary } from '@/types/user';
 import type {
-  ExpensePagination,
-  ExpenseUser,
   Frequency,
-  ExpensePayload,
-} from '@/features/expenses/types';
+  StandardSplitType,
+  SplitParticipant,
+} from '@/lib/finance/types';
 export const billCategories = [
   'RENT',
   'ELECTRICITY',
@@ -39,7 +40,7 @@ export interface Bill {
   recurrenceSourceId?: string | null;
   occurrenceNumber?: number;
   status: BillStatus;
-  paidBy: ExpenseUser | null;
+  paidBy: UserSummary | null;
   paidAt: string | null;
   expenseId: string | null;
   paymentPending: boolean;
@@ -59,7 +60,7 @@ export interface BillPayload {
 export interface BillsResponse {
   success: boolean;
   data: { bills: Bill[] };
-  pagination: ExpensePagination;
+  pagination: Pagination;
 }
 export interface ReminderBucket {
   count: number;
@@ -87,11 +88,11 @@ export interface BillOverview {
     };
   };
 }
-export type PaymentSplit = Exclude<ExpensePayload['splitType'], 'ITEMIZED'>;
+export type PaymentSplit = StandardSplitType;
 export type PaymentPayload =
   | { resume: true }
   | {
       paidBy: string;
       splitType: PaymentSplit;
-      participants: NonNullable<ExpensePayload['participants']>;
+      participants: SplitParticipant[];
     };

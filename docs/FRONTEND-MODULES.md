@@ -1,6 +1,6 @@
 # Frontend module updates
 
-Deliver one module at a time for review.
+Deliver one module at a time for review. For the current folder layout and conventions, see [ARCHITECTURE.md](ARCHITECTURE.md); earlier increments below are historical notes.
 
 ## Increment 1: groups and session foundation
 
@@ -48,6 +48,19 @@ Implemented under `src/features/bills`:
 Validation: production build, full-project lint and all 14 regression tests pass. Fixture-backed browser checks cover unpaid/history separation, cached filter restoration, server pagination/search, reminders, paid/legacy/linked-expense details, recurring create/edit/disable, generated occurrence restrictions, save/delete retries, all four payment splits, review, 409/503 recovery, one linked expense on resume, bill changes during review, zero-/three-decimal currencies, group switching, mobile layouts, retry states, keyboard tabs and dashboard shortcuts. Live database writes, real notification delivery and timed recurring workers were not exercised.
 
 Backend limits retained: paid source bills cannot be edited/deleted, so their recurring schedules cannot be stopped through the current API after payment. Payment preflight detects changes already committed before confirmation; the API does not expose an expected-version token to eliminate a simultaneous edit after that check. Backend workers own payment deduplication/recovery and recurring generation.
+
+## Maintenance: project organization
+
+- Moved app providers/router/store/listeners under `src/app`; all screens now live in their feature's `pages` directory and load lazily.
+- Consolidated household/group API, Redux and selector code into Groups. Runtime state is `groups.selectedGroup`; stored legacy selections remain readable.
+- Moved persistence out of reducers into application listeners; kept token storage and backend contracts unchanged.
+- Promoted money, split, date, formatting and error helpers into shared `lib`/`services` modules with shared contracts under `types` and `lib/finance/types`.
+- Split reminders/payment setup/payment summary/recurring-expense controls into focused feature components. Extracted shell navigation configuration.
+- Organized active logos in `public/brand`, removed unused Vite starter CSS/SVGs and obsolete page wrappers, and retained existing design/legacy assets.
+- Added an example environment file, project README, architecture guide and ESLint shared-code import boundary.
+- Added regression coverage for invalid stored selections, canonical/legacy precedence, writes and session cleanup.
+
+Validation: build, full lint and all 19 regression tests pass. Existing fixture-backed Groups, Expenses and Bills browser suites pass after the moves. A focused session check also verified login token persistence, logout/account cache isolation, reload restoration, legacy route compatibility and 401 cleanup. Backend contracts and cookie behavior were not changed.
 
 ## Next increments
 

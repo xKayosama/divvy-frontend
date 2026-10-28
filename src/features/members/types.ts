@@ -1,15 +1,13 @@
-export interface HouseholdMemberUser {
-  _id: string;
-  firstName: string;
-  lastName: string;
+import type { UserSummary } from '@/types/user';
+export interface MemberUser extends UserSummary {
   email: string;
   avatar: string | null;
 }
 
-export interface HouseholdMember {
+export interface GroupMember {
   _id: string;
-  householdId: string;
-  userId: HouseholdMemberUser;
+  groupId: string;
+  userId: MemberUser;
   role: 'OWNER' | 'MEMBER';
   status: 'ACTIVE' | 'INACTIVE';
   joinedAt: string;
@@ -17,11 +15,11 @@ export interface HouseholdMember {
   updatedAt: string;
 }
 
-export interface HouseholdMembersResponse {
+export interface MembersResponse {
   code: number;
   success: boolean;
   message: string;
   data: {
-    members: HouseholdMember[];
+    members: GroupMember[];
   };
 }

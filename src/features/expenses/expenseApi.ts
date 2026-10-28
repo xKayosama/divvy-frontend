@@ -6,7 +6,7 @@ import type {
   ExpensesResponse,
 } from './types';
 export interface GetExpensesParams {
-  householdId: string;
+  groupId: string;
   page?: number;
   limit?: number;
   startDate?: string;
@@ -15,7 +15,7 @@ export interface GetExpensesParams {
   search?: string;
   sort?: ExpenseSort;
 }
-export type CreateExpenseRequest = ExpensePayload & { householdId: string };
+export type CreateExpenseRequest = ExpensePayload & { groupId: string };
 export type UpdateExpenseRequest = Omit<ExpensePayload, 'recurring'> & {
   expenseId: string;
 };
@@ -28,8 +28,8 @@ const invalidatesTags = [
 export const expenseApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getExpenses: builder.query<ExpensesResponse, GetExpensesParams>({
-      query: ({ householdId, ...params }) => ({
-        url: `/groups/${householdId}/expenses`,
+      query: ({ groupId, ...params }) => ({
+        url: `/groups/${groupId}/expenses`,
         params,
       }),
       providesTags: ['Expense'],
@@ -42,8 +42,8 @@ export const expenseApi = api.injectEndpoints({
       { data: { expense: Expense } },
       CreateExpenseRequest
     >({
-      query: ({ householdId, ...body }) => ({
-        url: `/groups/${householdId}/expenses`,
+      query: ({ groupId, ...body }) => ({
+        url: `/groups/${groupId}/expenses`,
         method: 'POST',
         body,
       }),

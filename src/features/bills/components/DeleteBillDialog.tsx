@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { apiMessage } from '@/features/expenses/lib/money';
+import { apiMessage } from '@/services/api-error';
 import { useDeleteBillMutation } from '../billApi';
 import { billState } from '../lib/bill-state';
 import type { Bill } from '../types';

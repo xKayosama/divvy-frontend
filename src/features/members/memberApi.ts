@@ -1,21 +1,15 @@
 import { api } from '@/services/api';
 
-import type { HouseholdMembersResponse } from './types';
+import type { MembersResponse } from './types';
 
 export const memberApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getHouseholdMembers: builder.query<
-      HouseholdMembersResponse,
-      string
-    >({
-      query: (householdId) =>
-        `/groups/${householdId}/members`,
+    getGroupMembers: builder.query<MembersResponse, string>({
+      query: (groupId) => `/groups/${groupId}/members`,
 
       providesTags: ['Member'],
     }),
   }),
 });
 
-export const {
-  useGetHouseholdMembersQuery,
-} = memberApi;
+export const { useGetGroupMembersQuery } = memberApi;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import RecurringExpenseSchedule from './RecurringExpenseSchedule';
 import { Pencil, Trash2, Repeat2, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,18 +8,17 @@ import {
   DialogDescription,
   DialogHeader,
 } from '@/components/ui/dialog';
+import { useGetExpenseQuery } from '../expenseApi';
 import {
-  useGetExpenseQuery,
-  useUpdateExpenseRecurrenceMutation,
-} from '../expenseApi';
-import {
-  categoryLabel,
-  splitLabels,
+  formatLabel as categoryLabel,
   personName,
-  participantId,
-} from '../types';
+  userId as participantId,
+} from '@/lib/format';
+import { splitLabels } from '@/lib/finance/types';
 import type { Expense } from '../types';
-import { apiMessage, currencyMoney, expenseDate } from '../lib/money';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { formatDate } from '@/lib/date';
 
 interface Props {
   expenseId: string;
@@ -100,7 +99,7 @@ export default function ExpenseDetailsDialog({
               <div className="grid grid-cols-2 gap-3">
                 {[
                   ['Paid by', personName(expense.paidBy)],
-                  ['Date (UTC)', expenseDate(expense.date)],
+                  ['Date (UTC)', formatDate(expense.date)],
                   ['Split method', splitLabels[expense.splitType]],
                   ['Currency', currency],
                 ].map(([label, value]) => (
@@ -185,7 +184,7 @@ export default function ExpenseDetailsDialog({
                 </section>
               )}
               {expense.recurring && (
-                <Schedule
+                <RecurringExpenseSchedule
                   key={`${expense._id}:${expense.updatedAt}`}
                   expense={expense}
                 />
@@ -246,92 +245,5 @@ export default function ExpenseDetailsDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-function Schedule({ expense }: { expense: Expense }) {
-  const schedule = expense.recurring!;
-  const [endDate, setEndDate] = useState(schedule.endDate?.slice(0, 10) ?? '');
-  const [error, setError] = useState('');
-  const [change, { isLoading }] = useUpdateExpenseRecurrenceMutation();
-  async function save(body: { paused?: boolean; endDate?: string | null }) {
-    setError('');
-    try {
-      await change({ expenseId: expense._id, ...body }).unwrap();
-    } catch (caught) {
-      setError(apiMessage(caught));
-    }
-  }
-  return (
-    <section className="space-y-3 rounded-2xl border p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 font-semibold">
-          <Repeat2 className="size-4 text-primary" />
-          {categoryLabel(schedule.frequency)} schedule
-        </h3>
-        <span className="rounded-full bg-secondary px-2 py-1 text-xs text-secondary-foreground">
-          {schedule.paused
-            ? 'Paused'
-            : schedule.nextDate
-              ? 'Active'
-              : 'Completed'}
-        </span>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {schedule.paused
-          ? 'Automatic entries are paused.'
-          : schedule.nextDate
-            ? `Next entry: ${expenseDate(schedule.nextDate)} (UTC)`
-            : 'No future entries are scheduled.'}
-      </p>
-      {schedule.lastError && (
-        <p className="text-sm text-destructive">{schedule.lastError}</p>
-      )}
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void save({ endDate: endDate || null });
-        }}
-      >
-        <label
-          className="min-w-0 flex-1 space-y-2 text-xs font-medium"
-          htmlFor="schedule-end"
-        >
-          Repeat until (optional)
-          <input
-            id="schedule-end"
-            type="date"
-            min={schedule.anchor.slice(0, 10)}
-            className="block h-10 w-full rounded-xl border bg-card px-3 text-sm"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            disabled={isLoading}
-          />
-        </label>
-        <Button type="submit" variant="outline" disabled={isLoading}>
-          Save end date
-        </Button>
-      </form>
-      <Button
-        variant="outline"
-        disabled={isLoading}
-        onClick={() => save({ paused: !schedule.paused })}
-      >
-        {isLoading
-          ? 'Updating…'
-          : schedule.paused
-            ? 'Resume schedule'
-            : 'Pause schedule'}
-      </Button>
-      <p className="text-xs leading-5 text-muted-foreground">
-        Resuming skips missed dates. Editing the original expense changes future
-        entries; existing occurrences stay unchanged.
-      </p>
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-    </section>
   );
 }

@@ -1,3 +1,4 @@
+import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
@@ -15,23 +16,25 @@ import {
 import { useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { Household } from '@/features/household/householdApi';
+import type { Group } from '@/features/groups/types';
 import { useGetExpensesQuery } from '../expenseApi';
 import type { Expense, ExpenseSort } from '../types';
 import {
-  categoryLabel,
-  expenseCategories,
+  formatLabel as categoryLabel,
   personName,
-  participantId,
-  splitLabels,
-} from '../types';
-import { apiMessage, currencyMoney, expenseDate } from '../lib/money';
+  userId as participantId,
+} from '@/lib/format';
+import { splitLabels } from '@/lib/finance/types';
+import { expenseCategories } from '../types';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { formatDate } from '@/lib/date';
 import ExpenseFormDialog from '../components/ExpenseFormDialog';
 import ExpenseDetailsDialog from '../components/ExpenseDetailsDialog';
 import DeleteExpenseDialog from '../components/DeleteExpenseDialog';
 
 export default function ExpensesPage() {
-  const group = useAppSelector((state) => state.household.selectedHousehold);
+  const group = useAppSelector((state) => state.groups.selectedGroup);
   return group ? (
     <GroupExpenses key={group.id} group={group} />
   ) : (
@@ -54,9 +57,7 @@ const initialFilters: Filters = {
   sort: 'newest',
   page: 1,
 };
-const selectStyle =
-  'h-11 w-full min-w-0 rounded-xl border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
-function GroupExpenses({ group }: { group: Household }) {
+function GroupExpenses({ group }: { group: Group }) {
   const userId = useAppSelector((state) => state.auth.user?._id);
   const [filters, setFilters] = useState(initialFilters);
   const [searchDraft, setSearchDraft] = useState('');
@@ -76,7 +77,7 @@ function GroupExpenses({ group }: { group: Household }) {
     refetch,
   } = useGetExpensesQuery(
     {
-      householdId: group.id,
+      groupId: group.id,
       page: filters.page,
       limit: 20,
       sort: filters.sort,
@@ -230,19 +231,18 @@ function GroupExpenses({ group }: { group: Household }) {
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <label className="space-y-2 text-xs font-medium">
             Category
-            <select
+            <FormSelect
               aria-label="Filter category"
-              className={selectStyle}
               value={filters.category}
-              onChange={(event) => filter({ category: event.target.value })}
-            >
-              <option value="">All categories</option>
-              {expenseCategories.map((category) => (
-                <option key={category} value={category}>
-                  {categoryLabel(category)}
-                </option>
-              ))}
-            </select>
+              onValueChange={(value) => filter({ category: value })}
+              options={[
+                { value: '', label: 'All categories' },
+                ...expenseCategories.map((value) => ({
+                  value,
+                  label: categoryLabel(value),
+                })),
+              ]}
+            />
           </label>
           <label className="space-y-2 text-xs font-medium">
             From (UTC)
@@ -268,19 +268,17 @@ function GroupExpenses({ group }: { group: Household }) {
           </label>
           <label className="space-y-2 text-xs font-medium">
             Sort by
-            <select
+            <FormSelect
               aria-label="Sort expenses"
-              className={selectStyle}
               value={filters.sort}
-              onChange={(event) =>
-                filter({ sort: event.target.value as ExpenseSort })
-              }
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="amount_high">Highest amount</option>
-              <option value="amount_low">Lowest amount</option>
-            </select>
+              onValueChange={(value) => filter({ sort: value as ExpenseSort })}
+              options={[
+                { value: 'newest', label: 'Newest first' },
+                { value: 'oldest', label: 'Oldest first' },
+                { value: 'amount_high', label: 'Highest amount' },
+                { value: 'amount_low', label: 'Lowest amount' },
+              ]}
+            />
           </label>
         </div>
         {activeFilters && (
@@ -386,7 +384,7 @@ function GroupExpenses({ group }: { group: Household }) {
                   </span>
                   <span className="mt-1 block text-xs leading-5 text-muted-foreground">
                     {categoryLabel(expense.category)} ·{' '}
-                    {expenseDate(expense.date)}
+                    {formatDate(expense.date)}
                   </span>
                   <span className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
                     <span>Paid by {personName(expense.paidBy)}</span>

@@ -1,9 +1,9 @@
+import { FormSelect } from '@/components/ui/form-select';
+import BillReminders from '../components/BillReminders';
 import { useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowUpRight,
-  Bell,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -15,17 +15,15 @@ import {
 import { useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { Household } from '@/features/household/householdApi';
-import { categoryLabel, personName } from '@/features/expenses/types';
-import {
-  currencyMoney,
-  expenseDate,
-  apiMessage,
-} from '@/features/expenses/lib/money';
+import type { Group } from '@/features/groups/types';
+import { formatLabel as categoryLabel, personName } from '@/lib/format';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { formatDate } from '@/lib/date';
 import ExpenseDetailsDialog from '@/features/expenses/components/ExpenseDetailsDialog';
-import { useGetBillsQuery, useGetBillOverviewQuery } from '../billApi';
+import { useGetBillsQuery } from '../billApi';
 import { billCategories } from '../types';
-import type { Bill, BillView, BillSort, ReminderBucket } from '../types';
+import type { Bill, BillView, BillSort } from '../types';
 import { billState, defaultBillFilters } from '../lib/bill-state';
 import type { BillFilters } from '../lib/bill-state';
 import BillFormDialog from '../components/BillFormDialog';
@@ -35,7 +33,7 @@ import BillPaymentDialog from '../components/BillPaymentDialog';
 import BillStatusBadge from '../components/BillStatusBadge';
 
 export default function BillsPage() {
-  const group = useAppSelector((state) => state.household.selectedHousehold);
+  const group = useAppSelector((state) => state.groups.selectedGroup);
   const [search] = useSearchParams();
   return group ? (
     <GroupBills
@@ -49,15 +47,13 @@ export default function BillsPage() {
     <Navigate to="/groups" replace />
   );
 }
-const selectStyle =
-  'h-11 w-full min-w-0 rounded-xl border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
 function GroupBills({
   group,
   initialView,
   initialStatus,
   initialBillId,
 }: {
-  group: Household;
+  group: Group;
   initialView: BillView;
   initialStatus: string | null;
   initialBillId: string | null;
@@ -80,7 +76,6 @@ function GroupBills({
     [payment, setPayment] = useState<string | null>(null),
     [expense, setExpense] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
-  const [showReminders, setShowReminders] = useState(false);
   const active = filters[view];
   const {
     currentData: data,
@@ -91,14 +86,10 @@ function GroupBills({
     { groupId: group.id, view, filters: active },
     { pollingInterval: 60000 },
   );
-  const overview = useGetBillOverviewQuery(group.id, {
-    pollingInterval: 60000,
-  });
   const bills = data?.data.bills ?? [],
     total = data?.pagination.total ?? 0,
     pages = Math.max(1, data?.pagination.totalPages ?? 1);
-  const money = currencyMoney(group.currency),
-    reminders = overview.currentData?.data.billReminders;
+  const money = currencyMoney(group.currency);
   const hasFilters = !!(
     active.search ||
     active.category ||
@@ -165,95 +156,11 @@ function GroupBills({
           </Button>
         </div>
       )}
-      <section aria-label="Bill reminders" className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Bell className="size-4 text-primary" />
-            Across all unpaid bills · UTC
-          </h2>
-          <Button
-            variant="ghost"
-            className="text-primary"
-            onClick={() => setShowReminders((current) => !current)}
-            aria-expanded={showReminders}
-          >
-            {showReminders ? 'Hide reminders' : 'View reminders'}
-          </Button>
-        </div>
-        {overview.error ? (
-          <div
-            role="alert"
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card p-4 text-sm"
-          >
-            <p>Bill reminders are temporarily unavailable.</p>
-            <Button variant="outline" onClick={() => overview.refetch()}>
-              Retry reminders
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            {(
-              [
-                { key: 'overdue', label: 'Overdue' },
-                { key: 'dueToday', label: 'Due today' },
-                { key: 'dueSoon', label: 'Next 7 days' },
-              ] as const
-            ).map(({ key, label }) => (
-              <div
-                key={key}
-                className={`rounded-2xl border p-3 sm:rounded-3xl sm:p-5 ${key === 'dueToday' ? 'bg-brand-spending text-white' : 'bg-card'}`}
-              >
-                <p
-                  className={`flex flex-wrap items-center justify-between gap-1 text-xs sm:text-sm ${key === 'dueToday' ? 'text-white/80' : 'text-muted-foreground'}`}
-                >
-                  {label}
-                  <CalendarDays
-                    className={`size-4 ${key === 'dueToday' ? 'text-accent' : key === 'overdue' ? 'text-destructive' : 'text-primary'}`}
-                  />
-                </p>
-                <p
-                  className={`mt-3 break-words text-lg sm:mt-4 sm:text-3xl font-semibold ${key === 'overdue' ? 'text-destructive' : ''}`}
-                >
-                  {reminders ? money.format(reminders[key].amount) : '—'}
-                </p>
-                <p
-                  className={`mt-2 text-xs ${key === 'dueToday' ? 'text-white/75' : 'text-muted-foreground'}`}
-                >
-                  {reminders
-                    ? `${reminders[key].count} ${reminders[key].count === 1 ? 'bill' : 'bills'}`
-                    : 'Loading reminders…'}
-                  <span className="hidden sm:inline">
-                    {key === 'dueSoon' ? ' · from tomorrow' : ''}
-                  </span>
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-        {showReminders && reminders && (
-          <div className="grid gap-4 rounded-3xl border bg-card p-5 sm:grid-cols-3">
-            {(
-              [
-                { key: 'overdue', label: 'Overdue' },
-                { key: 'dueToday', label: 'Due today' },
-                { key: 'dueSoon', label: 'Next 7 days' },
-              ] as const
-            ).map(({ key, label }) => (
-              <ReminderList
-                key={key}
-                title={label}
-                bucket={reminders[key]}
-                currency={group.currency}
-                onOpen={setDetail}
-              />
-            ))}
-            <p className="text-xs leading-5 text-muted-foreground sm:col-span-3">
-              Up to five bills per section. Reminders follow UTC calendar dates
-              and refresh every minute.
-            </p>
-          </div>
-        )}
-      </section>
+      <BillReminders
+        groupId={group.id}
+        currency={group.currency}
+        onOpen={setDetail}
+      />
       <div
         role="tablist"
         aria-label="Bill views"
@@ -344,71 +251,64 @@ function GroupBills({
           >
             <label className="space-y-2 text-xs font-medium">
               Category
-              <select
-                className={selectStyle}
+              <FormSelect
                 aria-label="Filter bill category"
                 value={active.category}
-                onChange={(event) => change({ category: event.target.value })}
-              >
-                <option value="">All categories</option>
-                {billCategories.map((category) => (
-                  <option key={category} value={category}>
-                    {categoryLabel(category)}
-                  </option>
-                ))}
-              </select>
+                onValueChange={(value) => change({ category: value })}
+                options={[
+                  { value: '', label: 'All categories' },
+                  ...billCategories.map((value) => ({
+                    value,
+                    label: categoryLabel(value),
+                  })),
+                ]}
+              />
             </label>
             {view === 'upcoming' && (
               <label className="space-y-2 text-xs font-medium">
                 Status
-                <select
-                  className={selectStyle}
+                <FormSelect
                   aria-label="Filter bill status"
                   value={active.status}
-                  onChange={(event) =>
-                    change({
-                      status: event.target.value as BillFilters['status'],
-                    })
+                  onValueChange={(value) =>
+                    change({ status: value as BillFilters['status'] })
                   }
-                >
-                  <option value="">All unpaid</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="OVERDUE">Overdue</option>
-                </select>
+                  options={[
+                    { value: '', label: 'All unpaid' },
+                    { value: 'PENDING', label: 'Pending' },
+                    { value: 'OVERDUE', label: 'Overdue' },
+                  ]}
+                />
               </label>
             )}
             <label className="space-y-2 text-xs font-medium">
               Repeat
-              <select
-                className={selectStyle}
+              <FormSelect
                 aria-label="Filter bill recurrence"
                 value={active.recurring}
-                onChange={(event) =>
-                  change({
-                    recurring: event.target.value as BillFilters['recurring'],
-                  })
+                onValueChange={(value) =>
+                  change({ recurring: value as BillFilters['recurring'] })
                 }
-              >
-                <option value="">All bills</option>
-                <option value="true">Recurring sources</option>
-                <option value="false">One-time & generated bills</option>
-              </select>
+                options={[
+                  { value: '', label: 'All bills' },
+                  { value: 'true', label: 'Recurring sources' },
+                  { value: 'false', label: 'One-time & generated bills' },
+                ]}
+              />
             </label>
             <label className="space-y-2 text-xs font-medium">
               Sort by
-              <select
-                className={selectStyle}
+              <FormSelect
                 aria-label="Sort bills"
                 value={active.sort}
-                onChange={(event) =>
-                  change({ sort: event.target.value as BillSort })
-                }
-              >
-                <option value="due_soonest">Nearest due date</option>
-                <option value="due_latest">Latest due date</option>
-                <option value="amount_high">Highest amount</option>
-                <option value="amount_low">Lowest amount</option>
-              </select>
+                onValueChange={(value) => change({ sort: value as BillSort })}
+                options={[
+                  { value: 'due_soonest', label: 'Nearest due date' },
+                  { value: 'due_latest', label: 'Latest due date' },
+                  { value: 'amount_high', label: 'Highest amount' },
+                  { value: 'amount_low', label: 'Lowest amount' },
+                ]}
+              />
             </label>
           </div>
           {hasFilters && (
@@ -504,7 +404,7 @@ function GroupBills({
                       </span>
                       <span className="mt-1 block text-xs leading-5 text-muted-foreground">
                         {categoryLabel(bill.category)} · Due{' '}
-                        {expenseDate(bill.dueDate)}
+                        {formatDate(bill.dueDate)}
                       </span>
                       <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                         {bill.isRecurring && (
@@ -671,45 +571,5 @@ function GroupBills({
         />
       )}
     </div>
-  );
-}
-function ReminderList({
-  title,
-  bucket,
-  currency,
-  onOpen,
-}: {
-  title: string;
-  bucket: ReminderBucket;
-  currency: string;
-  onOpen: (id: string) => void;
-}) {
-  return (
-    <section className="space-y-2">
-      <h3 className="text-sm font-semibold">
-        {title} ({bucket.count})
-      </h3>
-      {!bucket.bills.length ? (
-        <p className="text-xs text-muted-foreground">
-          No bills in this window.
-        </p>
-      ) : (
-        bucket.bills.map((bill) => (
-          <button
-            key={bill._id}
-            className="block w-full rounded-xl bg-muted p-3 text-left outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
-            onClick={() => onOpen(bill._id)}
-          >
-            <span className="block truncate text-sm font-medium">
-              {bill.name}
-            </span>
-            <span className="mt-1 block text-xs text-muted-foreground">
-              {currencyMoney(currency).format(bill.amount)} ·{' '}
-              {expenseDate(bill.dueDate)}
-            </span>
-          </button>
-        ))
-      )}
-    </section>
   );
 }

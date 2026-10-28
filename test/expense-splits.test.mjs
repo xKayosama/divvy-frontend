@@ -1,10 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateSplit } from '../src/features/expenses/lib/split.ts';
-import {
-  currencyMoney,
-  expenseDate,
-} from '../src/features/expenses/lib/money.ts';
+import { calculateSplit } from '../src/lib/finance/split.ts';
+import { currencyMoney } from '../src/lib/finance/money.ts';
+import { formatDate } from '../src/lib/date.ts';
 const people = ['a', 'b', 'c'];
 const split = (amount, splitType, participants, currency = 'PHP', extra = {}) =>
   calculateSplit({ amount, splitType, participants, currency, ...extra });
@@ -159,5 +157,5 @@ test('empty and duplicate participants are rejected', () => {
   assert.ok(split(10, 'EQUAL', [{ userId: 'a' }, { userId: 'a' }]).error);
 });
 test('date-only values retain their UTC calendar day', () => {
-  assert.match(expenseDate('2026-10-28T23:30:00.000Z'), /28/);
+  assert.match(formatDate('2026-10-28T23:30:00.000Z'), /28/);
 });

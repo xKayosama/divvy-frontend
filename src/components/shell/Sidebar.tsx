@@ -1,59 +1,16 @@
 import { Brand } from '@/components/brand/Brand';
 import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeftRight,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Receipt,
-  Scale,
-  Settings,
-  Users,
-  X,
-} from 'lucide-react';
+import { LogOut, Settings, X } from 'lucide-react';
+import { navigation } from './navigation';
 
 import { useAppDispatch } from '@/app/hooks';
 
 import { useLogoutSessionMutation } from '@/features/auth/authApi';
 import { logout } from '@/features/auth/authSlice';
 import { useState } from 'react';
-import { clearSelectedHousehold } from '@/features/household/householdSlice';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-
-const navigation = [
-  {
-    label: 'Dashboard',
-    path: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    label: 'Expenses',
-    path: '/expenses',
-    icon: Receipt,
-  },
-  {
-    label: 'Bills',
-    path: '/bills',
-    icon: FileText,
-  },
-  {
-    label: 'Members',
-    path: '/members',
-    icon: Users,
-  },
-  {
-    label: 'Balances',
-    path: '/balances',
-    icon: Scale,
-  },
-  {
-    label: 'Settlements',
-    path: '/settlements',
-    icon: ArrowLeftRight,
-  },
-];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -82,7 +39,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       }
     }
     dispatch(logout());
-    dispatch(clearSelectedHousehold());
 
     onClose();
 

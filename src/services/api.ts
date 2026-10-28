@@ -1,10 +1,11 @@
+import { getStoredToken } from './session';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || '/api',
 
   prepareHeaders: (headers) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
@@ -17,12 +18,12 @@ const rawBaseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: async (args, context, options) => {
-    const requestToken = localStorage.getItem('token');
+    const requestToken = getStoredToken();
     const result = await rawBaseQuery(args, context, options);
     if (
       result.error?.status === 401 &&
       requestToken &&
-      requestToken === localStorage.getItem('token')
+      requestToken === getStoredToken()
     ) {
       context.dispatch({ type: 'auth/logout' });
     }
@@ -31,7 +32,7 @@ export const api = createApi({
 
   tagTypes: [
     'Auth',
-    'Household',
+    'Group',
     'Member',
     'Expense',
     'Bill',

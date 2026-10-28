@@ -7,12 +7,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { categoryLabel, personName } from '@/features/expenses/types';
-import {
-  currencyMoney,
-  expenseDate,
-  apiMessage,
-} from '@/features/expenses/lib/money';
+import { formatLabel as categoryLabel, personName } from '@/lib/format';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { formatDate } from '@/lib/date';
 import { useGetBillQuery } from '../billApi';
 import type { Bill } from '../types';
 import { billState } from '../lib/bill-state';
@@ -98,7 +96,7 @@ export default function BillDetailsDialog({
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <BillStatusBadge bill={bill} />
                 <p className="text-xs text-muted-foreground">
-                  Due {expenseDate(bill.dueDate)} (UTC)
+                  Due {formatDate(bill.dueDate)} (UTC)
                 </p>
               </div>
               <dl className="grid grid-cols-2 gap-3">
@@ -130,7 +128,7 @@ export default function BillDetailsDialog({
                       </dt>
                       <dd className="mt-1 text-sm font-medium">
                         {bill.paidAt
-                          ? expenseDate(bill.paidAt)
+                          ? formatDate(bill.paidAt)
                           : 'Date not recorded'}
                       </dd>
                     </div>

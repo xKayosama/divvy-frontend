@@ -2,7 +2,7 @@ import { Menu, UserCircle } from 'lucide-react';
 
 import { useAppSelector } from '@/app/hooks';
 
-import HouseholdSelector from '@/features/household/components/HouseholdSelector';
+import GroupSelector from '@/features/groups/components/GroupSelector';
 
 import { Button } from '@/components/ui/button';
 import { BrandMark } from '@/components/brand/Brand';
@@ -30,9 +30,9 @@ const Header = ({ onMenuClick }: HeaderProps) => {
 
       <BrandMark />
 
-      {/* Household */}
+      {/* Group */}
       <div className="min-w-0 flex-1">
-        <HouseholdSelector />
+        <GroupSelector />
       </div>
 
       {/* User */}
@@ -42,7 +42,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             {user ? `${user.firstName} ${user.lastName}` : 'User'}
           </p>
 
-          <p className="text-xs text-muted-foreground">Household Member</p>
+          <p className="text-xs text-muted-foreground">Group Member</p>
         </div>
 
         {user?.avatar ? (

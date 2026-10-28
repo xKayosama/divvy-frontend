@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { useDeleteExpenseMutation } from '../expenseApi';
 import type { Expense } from '../types';
-import { apiMessage } from '../lib/money';
+import { apiMessage } from '@/services/api-error';
 export default function DeleteExpenseDialog({
   expense,
   onClose,

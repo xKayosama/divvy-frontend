@@ -1,8 +1,9 @@
+import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { LoaderCircle, Plus, Trash2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
-import { useGetHouseholdMembersQuery } from '@/features/members/memberApi';
-import type { HouseholdMemberUser } from '@/features/members/types';
+import { useGetGroupMembersQuery } from '@/features/members/memberApi';
+import type { MemberUser } from '@/features/members/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,12 +18,12 @@ import {
   useUpdateExpenseMutation,
 } from '../expenseApi';
 import {
-  expenseCategories,
-  categoryLabel,
-  splitLabels,
-  participantId,
+  formatLabel as categoryLabel,
+  userId as participantId,
   personName,
-} from '../types';
+} from '@/lib/format';
+import { splitLabels } from '@/lib/finance/types';
+import { expenseCategories } from '../types';
 import type {
   Expense,
   ExpenseCategory,
@@ -32,8 +33,10 @@ import type {
   Frequency,
   Adjustments,
 } from '../types';
-import { apiMessage, currencyMoney, todayDate } from '../lib/money';
-import { calculateSplit } from '../lib/split';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { todayDate } from '@/lib/date';
+import { calculateSplit } from '@/lib/finance/split';
 
 interface Props {
   expense?: Expense;
@@ -42,8 +45,6 @@ interface Props {
   onClose: () => void;
   onSaved: (expense: Expense) => void;
 }
-const selectStyle =
-  'h-11 w-full min-w-0 rounded-xl border border-input bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
 const fieldStyle = 'space-y-2';
 interface ItemDraft {
   key: string;
@@ -67,7 +68,7 @@ export default function ExpenseFormDialog(props: Props) {
     isFetching,
     isError,
     refetch,
-  } = useGetHouseholdMembersQuery(props.groupId);
+  } = useGetGroupMembersQuery(props.groupId);
   return (
     <Dialog
       open
@@ -116,7 +117,7 @@ function ExpenseForm({
   onSaved,
   onBusy,
 }: Props & {
-  members: HouseholdMemberUser[];
+  members: MemberUser[];
   onBusy: (busy: boolean) => void;
 }) {
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -275,7 +276,7 @@ function ExpenseForm({
       const response = expense
         ? await update({ expenseId: expense._id, ...body }).unwrap()
         : await create({
-            householdId: groupId,
+            groupId: groupId,
             ...body,
             ...(frequency
               ? { recurring: { frequency, endDate: endDate || null } }
@@ -363,39 +364,35 @@ function ExpenseForm({
               <label htmlFor="expense-category" className="text-sm font-medium">
                 Category
               </label>
-              <select
+              <FormSelect
                 id="expense-category"
-                className={selectStyle}
                 value={category}
-                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-              >
-                {expenseCategories.map((value) => (
-                  <option key={value} value={value}>
-                    {categoryLabel(value)}
-                  </option>
-                ))}
-              </select>
+                onValueChange={(value) => setCategory(value as ExpenseCategory)}
+                options={expenseCategories.map((value) => ({
+                  value,
+                  label: categoryLabel(value),
+                }))}
+              />
             </div>
             <div className={fieldStyle}>
               <label htmlFor="expense-payer" className="text-sm font-medium">
                 Paid by
               </label>
-              <select
+              <FormSelect
                 id="expense-payer"
-                className={selectStyle}
                 value={payer}
-                onChange={(e) => setPayer(e.target.value)}
+                onValueChange={setPayer}
                 required
-              >
-                {!knownIds.has(payer) && (
-                  <option value={payer}>Choose an active member</option>
-                )}
-                {members.map((member) => (
-                  <option key={member._id} value={member._id}>
-                    {personName(member)}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  ...(!knownIds.has(payer)
+                    ? [{ value: payer, label: 'Choose an active member' }]
+                    : []),
+                  ...members.map((member) => ({
+                    value: member._id,
+                    label: personName(member),
+                  })),
+                ]}
+              />
             </div>
             <div className={fieldStyle}>
               <label htmlFor="expense-date" className="text-sm font-medium">
@@ -633,23 +630,25 @@ function ExpenseForm({
                           (key === 'tax' ? setTax : setTip)(e.target.value)
                         }
                       />
-                      <select
+                      <FormSelect
                         aria-label={`${key} allocation`}
-                        className={selectStyle}
                         value={key === 'tax' ? taxAllocation : tipAllocation}
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           (key === 'tax' ? setTaxAllocation : setTipAllocation)(
-                            e.target.value as 'EQUAL' | 'PROPORTIONAL',
+                            value as 'EQUAL' | 'PROPORTIONAL',
                           )
                         }
-                      >
-                        <option value="PROPORTIONAL">
-                          In proportion to item shares
-                        </option>
-                        <option value="EQUAL">
-                          Equally between assigned members
-                        </option>
-                      </select>
+                        options={[
+                          {
+                            value: 'PROPORTIONAL',
+                            label: 'In proportion to item shares',
+                          },
+                          {
+                            value: 'EQUAL',
+                            label: 'Equally between assigned members',
+                          },
+                        ]}
+                      />
                     </div>
                   ))}
                 </div>
@@ -689,19 +688,19 @@ function ExpenseForm({
                 >
                   Repeat this expense
                 </label>
-                <select
+                <FormSelect
                   id="expense-frequency"
-                  className={selectStyle}
                   value={frequency}
-                  onChange={(e) =>
-                    setFrequency(e.target.value as Frequency | '')
+                  onValueChange={(value) =>
+                    setFrequency(value as Frequency | '')
                   }
-                >
-                  <option value="">Does not repeat</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
-                </select>
+                  options={[
+                    { value: '', label: 'Does not repeat' },
+                    { value: 'WEEKLY', label: 'Weekly' },
+                    { value: 'MONTHLY', label: 'Monthly' },
+                    { value: 'YEARLY', label: 'Yearly' },
+                  ]}
+                />
               </div>
               {frequency && (
                 <div className={fieldStyle}>

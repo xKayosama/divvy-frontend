@@ -1,3 +1,4 @@
+import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,19 +10,15 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  apiMessage,
-  currencyMoney,
-  todayDate,
-} from '@/features/expenses/lib/money';
-import { categoryLabel } from '@/features/expenses/types';
-import type { Frequency } from '@/features/expenses/types';
+import { currencyMoney } from '@/lib/finance/money';
+import { apiMessage } from '@/services/api-error';
+import { todayDate } from '@/lib/date';
+import { formatLabel as categoryLabel } from '@/lib/format';
+import type { Frequency } from '@/lib/finance/types';
 import { useCreateBillMutation, useUpdateBillMutation } from '../billApi';
 import { billCategories } from '../types';
 import type { Bill, BillCategory, BillPayload } from '../types';
 import { billState } from '../lib/bill-state';
-const selectStyle =
-  'h-11 w-full rounded-xl border bg-card px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
 export default function BillFormDialog({
   bill,
   groupId,
@@ -172,39 +169,36 @@ export default function BillFormDialog({
                   >
                     Category
                   </label>
-                  <select
+                  <FormSelect
                     id="bill-category"
-                    className={selectStyle}
                     value={category}
-                    onChange={(e) =>
-                      setCategory(e.target.value as BillCategory)
+                    onValueChange={(value) =>
+                      setCategory(value as BillCategory)
                     }
-                  >
-                    {billCategories.map((value) => (
-                      <option key={value} value={value}>
-                        {categoryLabel(value)}
-                      </option>
-                    ))}
-                  </select>
+                    options={billCategories.map((value) => ({
+                      value,
+                      label: categoryLabel(value),
+                    }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="bill-repeat" className="text-sm font-medium">
                     Repeat
                   </label>
-                  <select
+                  <FormSelect
                     id="bill-repeat"
-                    className={selectStyle}
                     disabled={!!bill?.recurrenceSourceId}
                     value={frequency}
-                    onChange={(e) =>
-                      setFrequency(e.target.value as Frequency | '')
+                    onValueChange={(value) =>
+                      setFrequency(value as Frequency | '')
                     }
-                  >
-                    <option value="">Does not repeat</option>
-                    <option value="WEEKLY">Weekly</option>
-                    <option value="MONTHLY">Monthly</option>
-                    <option value="YEARLY">Yearly</option>
-                  </select>
+                    options={[
+                      { value: '', label: 'Does not repeat' },
+                      { value: 'WEEKLY', label: 'Weekly' },
+                      { value: 'MONTHLY', label: 'Monthly' },
+                      { value: 'YEARLY', label: 'Yearly' },
+                    ]}
+                  />
                 </div>
               </div>
               {bill?.recurrenceSourceId ? (

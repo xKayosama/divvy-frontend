@@ -1,44 +1,11 @@
-import { api } from '../../services/api';
+import { api } from '@/services/api';
 
-export interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar: string | null;
-  role?: string | null;
-}
-
-export interface RegisterRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  code: number;
-  success: boolean;
-  message: string;
-  data: {
-    token: string;
-    user: User;
-  };
-}
-
-export interface MeResponse {
-  code: number;
-  success: boolean;
-  message: string;
-  data: {
-    user: User;
-  };
-}
+import type {
+  AuthResponse,
+  RegisterRequest,
+  LoginRequest,
+  MeResponse,
+} from './types';
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({

@@ -1,6 +1,7 @@
+import { getStoredToken } from '@/services/session';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { User } from './authApi';
+import type { User } from './types';
 
 interface AuthState {
   token: string | null;
@@ -8,7 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const token = localStorage.getItem('token');
+const token = getStoredToken();
 
 const initialState: AuthState = {
   token,
@@ -32,8 +33,6 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.user = action.payload.user;
       state.isAuthenticated = true;
-
-      localStorage.setItem('token', action.payload.token);
     },
 
     setUser: (state, action: PayloadAction<User>) => {
@@ -44,8 +43,6 @@ const authSlice = createSlice({
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
-
-      localStorage.removeItem('token');
     },
   },
 });

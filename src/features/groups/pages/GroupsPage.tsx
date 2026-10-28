@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Search, Users, Wallet } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { setSelectedHousehold } from '@/features/household/householdSlice';
+import { setSelectedGroup } from '@/features/groups/groupSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import LogoutButton from '@/features/auth/components/LogoutButton';
@@ -111,7 +111,7 @@ export default function GroupsPage() {
               <button
                 key={group.id}
                 onClick={() => {
-                  dispatch(setSelectedHousehold(group));
+                  dispatch(setSelectedGroup(group));
                   navigate('/dashboard');
                 }}
                 className="group rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-md focus-visible:outline-2 focus-visible:outline-primary"

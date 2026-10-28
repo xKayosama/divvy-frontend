@@ -7,7 +7,7 @@ export function Brand() {
       aria-label="Divvy"
     >
       <img
-        src="/divvy-word-green.png"
+        src="/brand/wordmark.png"
         alt=""
         className="absolute -left-7.5 -top-1.5 h-17.5 w-52.5 max-w-none object-contain"
       />
@@ -18,7 +18,7 @@ export function Brand() {
 export function BrandMark() {
   return (
     <img
-      src="/divvy-icon-green.png"
+      src="/brand/icon.png"
       alt="Divvy"
       className="size-8 shrink-0 object-contain lg:hidden"
     />

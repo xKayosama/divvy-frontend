@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# Divvy frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Divvy helps any group share expenses: friends, trips, roommates, families, events, and other shared plans. Homes are one use case, not the product’s scope.
 
-Currently, two official plugins are available:
+React + TypeScript web client for Divvy, using the mobile app's branding. UI components use shadcn/Base UI and Tailwind; Redux Toolkit manages client state and RTK Query handles API requests and caching.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run locally
 
-## React Compiler
+Use Node.js 24 and npm (the current project checks were run with Node 24).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```sh
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+If you already have `.env`, keep its settings instead of replacing it. `VITE_API_URL` points to the backend API root, including `/api`; the example uses `http://localhost:5000/api`. Run `../divvy-backend` separately with its own database/environment configuration. Vite prints the available frontend URL.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+## Project layout
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```text
+src/
+  app/          App providers, routing, Redux store, listeners, typed hooks
+  features/     Feature-owned pages, components, API endpoints, state and types
+    auth/
+    groups/
+    dashboard/
+    expenses/
+    bills/
+    members/
+  components/   Shared UI primitives, branding and application shell
+  lib/          Shared formatting, date and finance calculations
+  services/     Base RTK Query API, API errors and token persistence
+  types/        Small contracts shared by multiple features
+  main.tsx      Browser bootstrap
+  index.css     Mobile-aligned theme tokens and global styles
+public/brand/   Active logo and icon
 ```
+
+A feature owns its own `pages/`, `components/`, `<feature>Api.ts`, `types.ts`, optional `<feature>Slice.ts` and `lib/`. Features without a screen do not need empty page/component folders. Shared code does not import feature modules; ESLint enforces that boundary.
+
+[Architecture and adding a module](docs/ARCHITECTURE.md) · [Completed modules and remaining work](docs/FRONTEND-MODULES.md)
+
+## Checks
+
+```sh
+npm run build
+npm run lint
+npm test
+```
+
+Tests cover currency/split calculations, bill state/query behavior and selected-group storage compatibility. Browser workflow checks used fixture API responses; live MongoDB writes, delivery services and timed backend workers still need deployment-environment verification.
+
+## Authentication and persistence
+
+The backend currently returns bearer JWTs. The frontend persists the token in `localStorage`; it does not use authentication cookies. Redux reducers contain state changes only. Application listeners persist credentials/group selections and clear cached API data at session boundaries. Existing `selectedHousehold` selections are read for compatibility; new selections use `selectedGroup`.
