@@ -9,7 +9,7 @@ export const memberApi = api.injectEndpoints({
       string
     >({
       query: (householdId) =>
-        `/households/${householdId}/members`,
+        `/groups/${householdId}/members`,
 
       providesTags: ['Member'],
     }),

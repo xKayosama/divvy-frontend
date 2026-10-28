@@ -1,3 +1,4 @@
+import { Brand } from '@/components/brand/Brand';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ArrowLeftRight,
@@ -13,7 +14,9 @@ import {
 
 import { useAppDispatch } from '@/app/hooks';
 
+import { useLogoutSessionMutation } from '@/features/auth/authApi';
 import { logout } from '@/features/auth/authSlice';
+import { useState } from 'react';
 import { clearSelectedHousehold } from '@/features/household/householdSlice';
 
 import { Button } from '@/components/ui/button';
@@ -61,7 +64,23 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const handleLogout = () => {
+  const [endSession, { isLoading: signingOut }] = useLogoutSessionMutation();
+  const [logoutError, setLogoutError] = useState('');
+  const handleLogout = async () => {
+    setLogoutError('');
+    try {
+      await endSession().unwrap();
+    } catch (error) {
+      if (!(
+        error &&
+        typeof error === 'object' &&
+        'status' in error &&
+        error.status === 401
+      )) {
+        setLogoutError('Sign out failed. Please try again.');
+        return;
+      }
+    }
     dispatch(logout());
     dispatch(clearSelectedHousehold());
 
@@ -93,8 +112,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         ].join(' ')}
       >
         {/* Brand */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-100 px-4 lg:px-6">
-          <img src="/divvy-logo.png" alt="Tahanan" className="h-14 w-auto" />
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4 lg:px-6">
+          <Brand />
 
           {/* Mobile Close */}
           <Button
@@ -102,7 +121,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-xl text-slate-500 lg:hidden"
+            className="rounded-xl text-muted-foreground lg:hidden"
           >
             <X className="size-5" />
           </Button>
@@ -117,6 +136,13 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             Main
           </Label>
 
+          <NavLink
+            to="/groups"
+            onClick={onClose}
+            className="mb-4 rounded-xl border px-3 py-2 text-sm font-medium text-primary"
+          >
+            All groups
+          </NavLink>
           <nav className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -156,7 +182,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </nav>
 
           {/* Account */}
-          <div className="mt-auto border-t border-slate-100 pt-4">
+          <div className="mt-auto border-t border-border pt-4">
             <Label
               htmlFor="Account"
               className="mb-2 px-3 text-[10px] font-semibold tracking-[0.18em] uppercase"
@@ -187,15 +213,21 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <button
               type="button"
               onClick={handleLogout}
-              className="group mt-1 flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-red-50 hover:text-red-600"
+              disabled={signingOut}
+              className="group mt-1 flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-red-50 hover:text-red-600"
             >
               <LogOut
-                className="size-4 text-slate-400 transition-colors group-hover:text-red-500"
+                className="size-4 text-muted-foreground transition-colors group-hover:text-red-500"
                 strokeWidth={1.8}
               />
 
-              <span>Logout</span>
+              <span>{signingOut ? 'Signing out…' : 'Logout'}</span>
             </button>
+            {logoutError && (
+              <p role="alert" className="px-3 text-xs text-destructive">
+                {logoutError}
+              </p>
+            )}
           </div>
         </div>
       </aside>

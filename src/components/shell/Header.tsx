@@ -5,6 +5,7 @@ import { useAppSelector } from '@/app/hooks';
 import HouseholdSelector from '@/features/household/components/HouseholdSelector';
 
 import { Button } from '@/components/ui/button';
+import { BrandMark } from '@/components/brand/Brand';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -26,6 +27,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
       >
         <Menu className="size-5" />
       </Button>
+
+      <BrandMark />
 
       {/* Household */}
       <div className="min-w-0 flex-1">

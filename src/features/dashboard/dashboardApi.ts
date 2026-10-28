@@ -81,7 +81,7 @@ export interface DashboardResponse {
 export const dashboardApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getDashboard: builder.query<DashboardResponse, string>({
-      query: (householdId) => `/households/${householdId}/dashboard`,
+      query: (householdId) => `/groups/${householdId}/dashboard`,
       providesTags: ['Dashboard'],
     }),
   }),

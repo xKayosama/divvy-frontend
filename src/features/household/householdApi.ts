@@ -25,7 +25,14 @@ export interface HouseholdResponse {
 export const householdApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getHouseholds: builder.query<HouseholdResponse, void>({
-      query: () => '/households',
+      query: () => '/groups',
+      transformResponse: (response: {
+        success: boolean;
+        data: { groups: Household[] };
+      }): HouseholdResponse => ({
+        ...response,
+        data: { households: response.data.groups },
+      }),
       providesTags: ['Household'],
     }),
   }),

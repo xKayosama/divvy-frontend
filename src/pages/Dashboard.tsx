@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import {
   ArrowDownLeft,
   ArrowRight,
@@ -50,7 +50,7 @@ const Dashboard = () => {
   if (isFetching && !data) {
     return (
       <div className="flex min-h-64 items-center justify-center">
-        <p className="text-sm text-slate-500">Loading dashboard...</p>
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
       </div>
     );
   }
@@ -453,7 +453,10 @@ const Dashboard = () => {
           <CardContent className="p-5">
             <div className="grid grid-cols-3 gap-3">
               {/* Pending */}
-              <div className="rounded-xl bg-muted p-4">
+              <Link
+                to="/bills?status=PENDING"
+                className="block rounded-xl bg-muted p-4"
+              >
                 <p className="text-xs font-medium text-muted-foreground">
                   Pending
                 </p>
@@ -465,10 +468,13 @@ const Dashboard = () => {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {formatCurrency(bills.pendingAmount)}
                 </p>
-              </div>
+              </Link>
 
               {/* Overdue */}
-              <div className="rounded-xl bg-destructive/10 p-4">
+              <Link
+                to="/bills?status=OVERDUE"
+                className="block rounded-xl bg-destructive/10 p-4"
+              >
                 <p className="text-xs font-medium text-destructive/80">
                   Overdue
                 </p>
@@ -480,10 +486,13 @@ const Dashboard = () => {
                 <p className="mt-1 text-xs text-destructive/70">
                   {formatCurrency(bills.overdueAmount)}
                 </p>
-              </div>
+              </Link>
 
               {/* Paid */}
-              <div className="rounded-xl bg-secondary p-4">
+              <Link
+                to="/bills?view=history"
+                className="block rounded-xl bg-secondary p-4"
+              >
                 <p className="text-xs font-medium text-secondary-foreground/70">
                   Paid
                 </p>
@@ -495,7 +504,7 @@ const Dashboard = () => {
                 <p className="mt-1 text-xs text-secondary-foreground/70">
                   {formatCurrency(bills.paidAmount)}
                 </p>
-              </div>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -538,9 +547,10 @@ const Dashboard = () => {
             ) : (
               <div className="divide-y divide-border">
                 {upcomingBills.map((bill) => (
-                  <div
+                  <Link
+                    to={`/bills?billId=${encodeURIComponent(bill._id)}`}
                     key={bill._id}
-                    className="flex items-center justify-between gap-4 px-5 py-4"
+                    className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-secondary/50 focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
@@ -568,7 +578,7 @@ const Dashboard = () => {
                         {bill.status}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

@@ -42,6 +42,9 @@ export interface MeResponse {
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    logoutSession: builder.mutation<{ success: boolean }, void>({
+      query: () => ({ url: '/auth/logout', method: 'POST' }),
+    }),
     register: builder.mutation<AuthResponse, RegisterRequest>({
       query: (body) => ({
         url: '/auth/register',
@@ -65,4 +68,9 @@ export const authApi = api.injectEndpoints({
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useGetMeQuery } = authApi;
+export const {
+  useLogoutSessionMutation,
+  useRegisterMutation,
+  useLoginMutation,
+  useGetMeQuery,
+} = authApi;

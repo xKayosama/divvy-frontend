@@ -9,9 +9,12 @@ const ProtectedRoute = () => {
   const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-  const { data, isError, isFetching, isLoading } = useGetMeQuery(undefined, {
-    skip: !isAuthenticated || !!user,
-  });
+  const { data, error, isFetching, isLoading, refetch } = useGetMeQuery(
+    undefined,
+    {
+      skip: !isAuthenticated || !!user,
+    },
+  );
 
   useEffect(() => {
     if (data?.data.user) {
@@ -20,10 +23,10 @@ const ProtectedRoute = () => {
   }, [data, dispatch]);
 
   useEffect(() => {
-    if (isError) {
+    if (error && 'status' in error && error.status === 401) {
       dispatch(logout());
     }
-  }, [dispatch, isError]);
+  }, [dispatch, error]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -33,6 +36,16 @@ const ProtectedRoute = () => {
     return null;
   }
 
+  if (!user && error) {
+    return (
+      <main className="grid min-h-svh place-content-center gap-4 p-6 text-center">
+        <p>Unable to verify your session. Please try again.</p>
+        <button className="underline" onClick={() => refetch()}>
+          Try again
+        </button>
+      </main>
+    );
+  }
   return <Outlet />;
 };
 

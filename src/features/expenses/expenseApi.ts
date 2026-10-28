@@ -1,11 +1,10 @@
 import { api } from '@/services/api';
-
 import type {
-  ExpenseCategory,
-  ExpenseSplitType,
+  Expense,
+  ExpensePayload,
+  ExpenseSort,
   ExpensesResponse,
 } from './types';
-
 export interface GetExpensesParams {
   householdId: string;
   page?: number;
@@ -13,96 +12,76 @@ export interface GetExpensesParams {
   startDate?: string;
   endDate?: string;
   category?: string;
+  search?: string;
+  sort?: ExpenseSort;
 }
-
-export interface ExpensesParticipants {
-  userId: string;
-  amount: number;
-  percentage?: number | null;
-}
-
-export interface CreateExpenseRequest {
-  householdId: string;
-  description: string;
-  amount: number;
-  category: string;
-  paidBy: string;
-  splitType: string;
-  participants: ExpensesParticipants[];
-  date?: string;
-  notes?: string;
-}
-
-export interface UpdateExpenseRequest {
+export type CreateExpenseRequest = ExpensePayload & { householdId: string };
+export type UpdateExpenseRequest = Omit<ExpensePayload, 'recurring'> & {
   expenseId: string;
-  description: string;
-  amount: number;
-  category: ExpenseCategory;
-  paidBy: string;
-  splitType: ExpenseSplitType;
-  participants: ExpensesParticipants[];
-  date?: string;
-  notes?: string;
-}
-
+};
+const invalidatesTags = [
+  'Expense',
+  'Balance',
+  'Settlement',
+  'Dashboard',
+] as const;
 export const expenseApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getExpenses: builder.query<ExpensesResponse, GetExpensesParams>({
-      query: ({
-        householdId,
-        page = 1,
-        limit = 10,
-        category,
-        startDate,
-        endDate,
-      }) => ({
-        url: `/households/${householdId}/expenses`,
-        params: {
-          page,
-          limit,
-          category,
-          ...(startDate && { startDate }),
-          ...(endDate && { endDate }),
-        },
+      query: ({ householdId, ...params }) => ({
+        url: `/groups/${householdId}/expenses`,
+        params,
       }),
-
       providesTags: ['Expense'],
     }),
-
-    createExpense: builder.mutation<unknown, CreateExpenseRequest>({
+    getExpense: builder.query<{ data: { expense: Expense } }, string>({
+      query: (id) => `/expenses/${id}`,
+      providesTags: ['Expense'],
+    }),
+    createExpense: builder.mutation<
+      { data: { expense: Expense } },
+      CreateExpenseRequest
+    >({
       query: ({ householdId, ...body }) => ({
-        url: `/households/${householdId}/expenses`,
+        url: `/groups/${householdId}/expenses`,
         method: 'POST',
         body,
       }),
-
-      invalidatesTags: ['Expense', 'Balance', 'Settlement', 'Dashboard'],
+      invalidatesTags,
     }),
-
-    updateExpense: builder.mutation<unknown, UpdateExpenseRequest>({
+    updateExpense: builder.mutation<
+      { data: { expense: Expense } },
+      UpdateExpenseRequest
+    >({
       query: ({ expenseId, ...body }) => ({
         url: `/expenses/${expenseId}`,
         method: 'PUT',
         body,
       }),
-
-      invalidatesTags: ['Expense', 'Balance', 'Settlement', 'Dashboard'],
+      invalidatesTags,
     }),
-
     deleteExpense: builder.mutation<unknown, string>({
-      query: (expenseId) => ({
-        url: `/expenses/${expenseId}`,
-        method: 'DELETE',
+      query: (id) => ({ url: `/expenses/${id}`, method: 'DELETE' }),
+      invalidatesTags,
+    }),
+    updateExpenseRecurrence: builder.mutation<
+      { data: { expense: Expense } },
+      { expenseId: string; paused?: boolean; endDate?: string | null }
+    >({
+      query: ({ expenseId, ...body }) => ({
+        url: `/expenses/${expenseId}/recurrence`,
+        method: 'PATCH',
+        body,
       }),
-
-      invalidatesTags: ['Expense', 'Balance', 'Settlement', 'Dashboard'],
+      invalidatesTags,
     }),
   }),
 });
-
 export const {
   useGetExpensesQuery,
+  useGetExpenseQuery,
   useCreateExpenseMutation,
   useUpdateExpenseMutation,
   useDeleteExpenseMutation,
+  useUpdateExpenseRecurrenceMutation,
 } = expenseApi;

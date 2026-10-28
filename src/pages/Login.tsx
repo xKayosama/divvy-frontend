@@ -1,3 +1,4 @@
+import { Brand } from '@/components/brand/Brand';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,7 +59,7 @@ const Login = () => {
         }),
       );
 
-      navigate('/households', { replace: true });
+      navigate('/groups', { replace: true });
     } catch (error: unknown) {
       if (typeof error === 'object' && error !== null && 'data' in error) {
         const apiError = error as {
@@ -75,10 +76,10 @@ const Login = () => {
   };
 
   return (
-    <main className="min-h-svh bg-[#f8f9f6] p-3 font-sans text-slate-900 sm:p-6 lg:p-8">
+    <main className="min-h-svh bg-background bg-brand-screen p-3 font-sans text-foreground sm:p-6 lg:p-8">
       <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] max-w-7xl sm:min-h-[calc(100svh-3rem)] lg:min-h-[calc(100svh-4rem)] overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm lg:grid-cols-[1.05fr_1fr]">
         <section
-          className="relative flex flex-col justify-between overflow-hidden bg-[#173f35] p-5 text-white sm:p-8 lg:p-14"
+          className="relative flex flex-col justify-between overflow-hidden bg-brand-spending p-5 text-white sm:p-8 lg:p-14"
           aria-labelledby="brand-heading"
         >
           <div
@@ -89,16 +90,12 @@ const Login = () => {
             className="pointer-events-none absolute -right-20 top-52 size-72 rounded-full border border-white/10"
             aria-hidden="true"
           />
-          <div className="relative inline-flex w-fit items-center rounded-2xl bg-[#f8f9f6] px-4 py-2">
-            <img
-              src="/divvy-logo.png"
-              alt="Tahanan"
-              className="h-16  w-auto"
-            />
+          <div className="relative inline-flex w-fit items-center rounded-2xl bg-[#F3F8F6] px-4 py-2">
+            <Brand />
           </div>
 
           <div className="relative pt-6 sm:pt-8 lg:py-16">
-            <p className="mb-5 hidden text-xs font-semibold tracking-[0.2em] text-[#d5ebaa] uppercase lg:block">
+            <p className="mb-5 hidden text-xs font-semibold tracking-[0.2em] text-[#A1E8CD] uppercase lg:block">
               A little less math. A lot more home.
             </p>
             <h2
@@ -107,7 +104,7 @@ const Login = () => {
             >
               Shared home.
               <br />
-              Simpler <span className="text-[#d5ebaa]">expenses.</span>
+              Simpler <span className="text-[#A1E8CD]">expenses.</span>
             </h2>
             <p className="mt-3 max-w-sm text-sm leading-6 lg:mt-6 lg:text-base lg:leading-7 text-emerald-50/75">
               Keep the bills organized and everyone on the same page. Make room
@@ -118,13 +115,13 @@ const Login = () => {
               <div className="mb-5 flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-medium">
                   <Receipt
-                    className="size-4 text-[#d5ebaa]"
+                    className="size-4 text-[#A1E8CD]"
                     aria-hidden="true"
                   />{' '}
                   A happier household
                 </span>
                 <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] tracking-wider uppercase">
-                  The Tahanan way
+                  The Divvy way
                 </span>
               </div>
               {[
@@ -136,7 +133,7 @@ const Login = () => {
                   key={item}
                   className="flex items-center gap-3 border-t border-white/10 py-3 text-sm text-emerald-50/90"
                 >
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#d5ebaa] text-[#173f35]">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#A1E8CD] text-[#087F65]">
                     <Check className="size-3" aria-hidden="true" />
                   </span>
                   {item}
@@ -157,15 +154,15 @@ const Login = () => {
         >
           <Card className="mx-auto w-full max-w-sm gap-0 overflow-visible bg-transparent py-0 shadow-none ring-0">
             <CardHeader className="gap-0 px-0">
-              {/* <span className="mb-6 hidden size-12 items-center justify-center rounded-2xl border border-[#173f35]/10 bg-[#f1f5eb] text-[#173f35] lg:flex"><LockKeyhole className="size-5" aria-hidden="true" /></span> */}
-              <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#51705d] uppercase">
+              {/* <span className="mb-6 hidden size-12 items-center justify-center rounded-2xl border border-[#087F65]/10 bg-[#E5F5EE] text-[#087F65] lg:flex"><LockKeyhole className="size-5" aria-hidden="true" /></span> */}
+              <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#08634F] uppercase">
                 Your home, in harmony
               </p>
               <CardTitle className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 <h1 id="login-heading">Welcome back</h1>
               </CardTitle>
-              <CardDescription className="mt-3 text-sm leading-6 text-slate-500">
-                Sign in to your Tahanan account.
+              <CardDescription className="mt-3 text-sm leading-6 text-muted-foreground">
+                Sign in to your Divvy account.
                 <br />
                 Let’s get your household sorted.
               </CardDescription>
@@ -182,7 +179,7 @@ const Login = () => {
                   </Label>
                   <div className="relative">
                     <Mail
-                      className="pointer-events-none absolute top-4 left-4 size-4 text-slate-400"
+                      className="pointer-events-none absolute top-4 left-4 size-4 text-muted-foreground"
                       aria-hidden="true"
                     />
                     <Input
@@ -194,7 +191,7 @@ const Login = () => {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       required
-                      className="h-12 text-base md:text-base rounded-xl border-slate-200 bg-white pl-11 focus-visible:border-[#51705d] focus-visible:ring-[#51705d]/15"
+                      className="h-12 text-base md:text-base rounded-xl border-border bg-white pl-11 focus-visible:border-[#08634F] focus-visible:ring-[#08634F]/15"
                     />
                   </div>
                 </div>
@@ -205,7 +202,7 @@ const Login = () => {
                   </Label>
                   <div className="relative">
                     <LockKeyhole
-                      className="pointer-events-none absolute top-4 left-4 size-4 text-slate-400"
+                      className="pointer-events-none absolute top-4 left-4 size-4 text-muted-foreground"
                       aria-hidden="true"
                     />
                     <Input
@@ -217,7 +214,7 @@ const Login = () => {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       required
-                      className="h-12 text-base md:text-base rounded-xl border-slate-200 bg-white pr-12 pl-11 focus-visible:border-[#51705d] focus-visible:ring-[#51705d]/15"
+                      className="h-12 text-base md:text-base rounded-xl border-border bg-white pr-12 pl-11 focus-visible:border-[#08634F] focus-visible:ring-[#08634F]/15"
                     />
                     <Button
                       variant="ghost"
@@ -228,7 +225,7 @@ const Login = () => {
                         showPassword ? 'Hide password' : 'Show password'
                       }
                       aria-pressed={showPassword}
-                      className="absolute top-1 right-1 flex size-10 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-[#51705d]"
+                      className="absolute top-1 right-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-[#08634F]"
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" aria-hidden="true" />
@@ -270,8 +267,8 @@ const Login = () => {
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="mt-6 justify-center sm:mt-9 border-slate-100 bg-transparent px-0 pt-6 pb-0 text-center">
-              <p className="text-xs leading-5 text-slate-400">
+            <CardFooter className="mt-6 justify-center sm:mt-9 border-border bg-transparent px-0 pt-6 pb-0 text-center">
+              <p className="text-xs leading-5 text-muted-foreground">
                 One home. Shared expenses. Less stress.
               </p>
             </CardFooter>

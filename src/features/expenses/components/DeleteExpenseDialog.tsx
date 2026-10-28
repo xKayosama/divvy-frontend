@@ -1,125 +1,89 @@
-import { AlertTriangle, LoaderCircle, Trash2 } from 'lucide-react';
-
-import { useDeleteExpenseMutation } from '@/features/expenses/expenseApi';
-import type { Expense } from '@/features/expenses/types';
-
+import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
-
-interface DeleteExpenseDialogProps {
-  expense: Expense | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onDeleted?: () => void;
-}
-
-const DeleteExpenseDialog = ({
+import { useDeleteExpenseMutation } from '../expenseApi';
+import type { Expense } from '../types';
+import { apiMessage } from '../lib/money';
+export default function DeleteExpenseDialog({
   expense,
-  open,
-  onOpenChange,
+  onClose,
   onDeleted,
-}: DeleteExpenseDialogProps) => {
-  const [deleteExpense, { isLoading }] = useDeleteExpenseMutation();
-
-  const handleDelete = async () => {
-    if (!expense) {
-      return;
-    }
-
+}: {
+  expense: Expense;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
+  const [remove, { isLoading }] = useDeleteExpenseMutation();
+  const [error, setError] = useState('');
+  async function submit() {
+    if (isLoading || expense.billId) return;
+    setError('');
     try {
-      await deleteExpense(expense._id).unwrap();
-
-      onOpenChange(false);
-      onDeleted?.();
-    } catch (error) {
-      console.error('Failed to delete expense:', error);
+      await remove(expense._id).unwrap();
+      onDeleted();
+      onClose();
+    } catch (caught) {
+      setError(
+        apiMessage(caught, 'Could not delete this expense. Please try again.'),
+      );
     }
-  };
-
-  if (!expense) {
-    return null;
   }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden rounded-2xl bg-white p-0 sm:max-w-md">
-        <div className="px-6 pt-6">
-          <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-red-50">
-            <AlertTriangle className="size-6 text-red-600" />
-          </div>
-
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle className="text-xl font-semibold text-slate-900">
-              Delete expense?
-            </DialogTitle>
-
-            <DialogDescription className="text-sm leading-6 text-slate-500">
-              This expense will be permanently removed from your household
-              records.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-5 rounded-2xl border border-red-100 bg-red-50/60 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-red-600 shadow-sm">
-                <Trash2 className="size-4" />
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-900">
-                  {expense.description}
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                  This action cannot be undone.
-                </p>
-              </div>
-            </div>
-          </div>
+    <Dialog
+      open
+      onOpenChange={(value) => {
+        if (!value && !isLoading) onClose();
+      }}
+    >
+      <DialogContent
+        className="rounded-3xl bg-card p-6 text-card-foreground sm:max-w-md"
+        showCloseButton={!isLoading}
+      >
+        <div className="grid size-12 place-items-center rounded-2xl bg-destructive/10 text-destructive">
+          <Trash2 className="size-5" />
         </div>
-
-        <DialogFooter className="mt-6 mb-1 border-t border-slate-100 bg-slate-50/50 px-9">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isLoading}
-            onClick={() => onOpenChange(false)}
-            className="rounded-xl"
-            size="xl"
-          >
-            Cancel
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">
+            Delete expense?
+          </DialogTitle>
+          <DialogDescription>
+            This permanently removes “{expense.description}” and updates group
+            balances.
+            {expense.recurring
+              ? ' Future entries from this schedule will stop. Existing occurrences will remain.'
+              : ''}
+          </DialogDescription>
+        </DialogHeader>
+        {expense.billId && (
+          <p className="text-sm text-destructive">
+            Paid bill expenses cannot be deleted independently.
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" disabled={isLoading} onClick={onClose}>
+            Keep expense
           </Button>
-
           <Button
-            type="button"
-            disabled={isLoading}
-            onClick={handleDelete}
             variant="destructive"
-            size="xl"
+            disabled={isLoading || !!expense.billId}
+            onClick={submit}
           >
-            {isLoading ? (
-              <>
-                <LoaderCircle className="size-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              <>
-                <Trash2 className="size-4" />
-                Delete expense
-              </>
-            )}
+            {isLoading ? 'Deleting…' : 'Delete expense'}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default DeleteExpenseDialog;
+}

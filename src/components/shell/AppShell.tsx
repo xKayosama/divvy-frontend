@@ -16,7 +16,7 @@ const AppShell = () => {
   };
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-slate-50">
+    <div className="flex h-dvh overflow-hidden bg-background">
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
