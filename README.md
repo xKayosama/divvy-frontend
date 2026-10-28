@@ -39,7 +39,7 @@ public/brand/   Active logo and icon
 
 A feature owns its own `pages/`, `components/`, `<feature>Api.ts`, `types.ts`, optional `<feature>Slice.ts` and `lib/`. Features without a screen do not need empty page/component folders. Shared code does not import feature modules; ESLint enforces that boundary.
 
-[Architecture and adding a module](docs/ARCHITECTURE.md) · [Completed modules and remaining work](docs/FRONTEND-MODULES.md)
+[Deployment setup](docs/DEPLOYMENT.md) · [Architecture and adding a module](docs/ARCHITECTURE.md) · [Completed modules and remaining work](docs/FRONTEND-MODULES.md)
 
 ## Checks
 
