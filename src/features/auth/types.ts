@@ -35,3 +35,20 @@ export interface MeResponse {
     user: User;
   };
 }
+
+export interface UpdateProfileRequest {
+  firstName: string;
+  lastName: string;
+}
+export interface UpdateProfileResponse {
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      role?: string | null;
+    };
+  };
+}

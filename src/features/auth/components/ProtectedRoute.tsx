@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useGetMeQuery } from '@/features/auth/authApi';
 import { logout, setUser } from '@/features/auth/authSlice';
@@ -40,9 +41,9 @@ const ProtectedRoute = () => {
     return (
       <main className="grid min-h-svh place-content-center gap-4 p-6 text-center">
         <p>Unable to verify your session. Please try again.</p>
-        <button className="underline" onClick={() => refetch()}>
+        <Button variant="link" onClick={() => refetch()}>
           Try again
-        </button>
+        </Button>
       </main>
     );
   }

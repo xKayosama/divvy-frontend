@@ -1,3 +1,5 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 import { Navigate, Link } from 'react-router-dom';
 import {
   ArrowDownLeft,
@@ -23,7 +25,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { PageHeader } from '@/components/shell/PageHeader';
 
 import { useGetDashboardQuery } from '@/features/dashboard/dashboardApi';
 import { useAppSelector } from '@/app/hooks';
@@ -56,7 +58,7 @@ const DashboardPage = () => {
   if (isError || !data?.success) {
     return (
       <div className="flex min-h-64 items-center justify-center">
-        <p className="text-sm text-red-600">Failed to load dashboard.</p>
+        <p className="text-sm text-destructive">Failed to load dashboard.</p>
       </div>
     );
   }
@@ -114,71 +116,49 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-330 space-y-8">
-      {/* Header */}
-      <div>
-        <Label
-          htmlFor="Overview"
-          className="text-xs font-semibold tracking-[0.18em] text-primary uppercase"
-        >
-          Overview
-        </Label>
-
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
-          Dashboard
-        </h1>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          Here's an overview of your group expenses.
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Here's an overview of your group expenses."
+      />
 
       {/* Summary Cards */}
       <section>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           {/* Total Expenses */}
-          <Card className="rounded-2xl border-border bg-card py-0 text-card-foreground shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Expenses
-                  </p>
-
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-                    {formatCurrency(summary.totalExpenses)}
-                  </p>
-                </div>
-
-                <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+          <Card tone="brand" className="min-h-33 rounded-2xl py-0 shadow-sm">
+            <CardContent className="relative p-5">
+              <div className="flex items-center justify-between pr-12">
+                <p className="text-sm font-medium text-white/80">
+                  Total Expenses
+                </p>
+                <div className="absolute right-5 top-5 flex size-10 items-center justify-center rounded-xl bg-white/10 text-accent">
                   <Receipt className="size-5" strokeWidth={1.8} />
                 </div>
               </div>
-
-              <p className="mt-3 text-xs text-muted-foreground">
-                All group expenses
+              <p className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                {formatCurrency(summary.totalExpenses)}
               </p>
+
+              <p className="mt-3 text-xs text-white/80">All group expenses</p>
             </CardContent>
           </Card>
 
           {/* Total Paid */}
-          <Card className="rounded-2xl border-border bg-card py-0 text-card-foreground shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Paid
-                  </p>
-
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-                    {formatCurrency(summary.totalPaid)}
-                  </p>
-                </div>
-
-                <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+          <Card tone="mint" className="min-h-33 rounded-2xl py-0 shadow-sm">
+            <CardContent className="relative p-5">
+              <div className="flex items-center justify-between pr-12">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Paid
+                </p>
+                <div className="absolute right-5 top-5 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <ArrowUpRight className="size-5" strokeWidth={1.8} />
                 </div>
               </div>
+              <p className="mt-3 text-2xl font-semibold tracking-tight text-primary">
+                {formatCurrency(summary.totalPaid)}
+              </p>
 
               <p className="mt-3 text-xs text-muted-foreground">
                 Amount paid by members
@@ -187,51 +167,22 @@ const DashboardPage = () => {
           </Card>
 
           {/* Total Owed */}
-          <Card className="rounded-2xl border-border bg-card py-0 text-card-foreground shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Owed
-                  </p>
-
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-                    {formatCurrency(summary.totalOwed)}
-                  </p>
-                </div>
-
-                <div className="flex size-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+          <Card className="min-h-33 rounded-2xl border-border bg-card py-0 text-card-foreground shadow-sm">
+            <CardContent className="relative p-5">
+              <div className="flex items-center justify-between pr-12">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Owed
+                </p>
+                <div className="absolute right-5 top-5 flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                   <ArrowDownLeft className="size-5" strokeWidth={1.8} />
                 </div>
               </div>
+              <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+                {formatCurrency(summary.totalOwed)}
+              </p>
 
               <p className="mt-3 text-xs text-muted-foreground">
                 Total participant shares
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Group Status */}
-          <Card className="rounded-2xl border-0 bg-primary py-0 text-primary-foreground shadow-sm">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-primary-foreground/70">
-                    Group Status
-                  </p>
-
-                  <p className="mt-3 text-2xl font-semibold tracking-tight">
-                    {summary.totalExpenses > 0 ? 'Active' : 'All settled'}
-                  </p>
-                </div>
-
-                <div className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                  <CircleDollarSign className="size-5" strokeWidth={1.8} />
-                </div>
-              </div>
-
-              <p className="mt-3 text-xs text-primary-foreground/60">
-                Current group activity
               </p>
             </CardContent>
           </Card>
@@ -242,7 +193,7 @@ const DashboardPage = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Balances */}
         <Card className="rounded-2xl border-border bg-card py-0 shadow-sm">
-          <CardHeader className="border-b border-border px-5 py-5">
+          <CardHeader className="border-b border-border bg-secondary/35 px-5 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold tracking-tight">
@@ -284,12 +235,15 @@ const DashboardPage = () => {
                   return (
                     <div
                       key={balance.user._id}
-                      className="flex items-center justify-between gap-4 px-5 py-4"
+                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/40"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                          {balance.user.firstName.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar size="lg" aria-hidden="true">
+                          <AvatarImage src={balance.user.avatar} alt="" />
+                          <AvatarFallback>
+                            {balance.user.firstName.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
 
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-foreground">
@@ -331,7 +285,7 @@ const DashboardPage = () => {
 
         {/* Recent Expenses */}
         <Card className="rounded-2xl border-border bg-card py-0 shadow-sm">
-          <CardHeader className="border-b border-border px-5 py-5">
+          <CardHeader className="border-b border-border bg-secondary/35 px-5 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold tracking-tight">
@@ -377,7 +331,7 @@ const DashboardPage = () => {
                   return (
                     <div
                       key={expense._id}
-                      className="flex items-center justify-between gap-4 px-5 py-4"
+                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-secondary/40"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
@@ -430,7 +384,7 @@ const DashboardPage = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Bills */}
         <Card className="rounded-2xl border-border bg-card py-0 shadow-sm">
-          <CardHeader className="border-b border-border px-5 py-5">
+          <CardHeader className="border-b border-border bg-secondary/35 px-5 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold tracking-tight text-card-foreground">
@@ -453,17 +407,17 @@ const DashboardPage = () => {
               {/* Pending */}
               <Link
                 to="/bills?status=PENDING"
-                className="block rounded-xl bg-muted p-4"
+                className="block min-w-0 rounded-xl bg-warning p-3 sm:p-4 ring-1 ring-warning-foreground/10 transition-colors hover:bg-warning/80 focus-visible:outline-2 focus-visible:outline-ring"
               >
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-xs font-medium text-warning-foreground">
                   Pending
                 </p>
 
-                <p className="mt-2 text-2xl font-semibold text-foreground">
+                <p className="mt-2 text-2xl font-semibold text-warning-foreground">
                   {bills.pending}
                 </p>
 
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-xs text-warning-foreground">
                   {formatCurrency(bills.pendingAmount)}
                 </p>
               </Link>
@@ -471,17 +425,15 @@ const DashboardPage = () => {
               {/* Overdue */}
               <Link
                 to="/bills?status=OVERDUE"
-                className="block rounded-xl bg-destructive/10 p-4"
+                className="block min-w-0 rounded-xl bg-destructive/10 p-3 sm:p-4 ring-1 ring-destructive/10 transition-colors hover:bg-destructive/15 focus-visible:outline-2 focus-visible:outline-ring"
               >
-                <p className="text-xs font-medium text-destructive/80">
-                  Overdue
-                </p>
+                <p className="text-xs font-medium text-destructive">Overdue</p>
 
                 <p className="mt-2 text-2xl font-semibold text-destructive">
                   {bills.overdue}
                 </p>
 
-                <p className="mt-1 text-xs text-destructive/70">
+                <p className="mt-1 text-xs text-destructive">
                   {formatCurrency(bills.overdueAmount)}
                 </p>
               </Link>
@@ -489,7 +441,7 @@ const DashboardPage = () => {
               {/* Paid */}
               <Link
                 to="/bills?view=history"
-                className="block rounded-xl bg-secondary p-4"
+                className="block min-w-0 rounded-xl bg-secondary p-3 sm:p-4 ring-1 ring-primary/10 transition-colors hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <p className="text-xs font-medium text-secondary-foreground/70">
                   Paid
@@ -509,7 +461,7 @@ const DashboardPage = () => {
 
         {/* Upcoming Bills */}
         <Card className="rounded-2xl border-border bg-card py-0 shadow-sm">
-          <CardHeader className="border-b border-border px-5 py-5">
+          <CardHeader className="border-b border-border bg-secondary/35 px-5 py-5">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold tracking-tight text-card-foreground">
@@ -572,7 +524,16 @@ const DashboardPage = () => {
                         {formatCurrency(bill.amount)}
                       </p>
 
-                      <span className="mt-1 inline-flex rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">
+                      <span
+                        className={cn(
+                          'mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                          bill.status === 'OVERDUE'
+                            ? 'bg-destructive/10 text-destructive'
+                            : bill.status === 'PAID'
+                              ? 'bg-secondary text-secondary-foreground'
+                              : 'bg-warning text-warning-foreground',
+                        )}
+                      >
                         {bill.status}
                       </span>
                     </div>

@@ -27,7 +27,7 @@ Keep existing singular API/slice filenames (`groupApi.ts`, `groupSlice.ts`) and 
 
 The Groups feature is the single owner of group API data, group types, selection state, storage compatibility and the group selector. There is no separate household API or household Redux slice.
 
-Auth owns its login screen, route guard, auth contracts and logout control. Dashboard owns its page and query. Expenses and Bills own their financial forms and routes. Members currently owns the shared group-members query; its full management screen remains future work.
+Auth owns its login screen, route guard, auth contracts, header account menu/profile dialog and shared sign-out hook. Dashboard owns its page and query. Expenses and Bills own their financial forms and routes. Members currently owns the shared group-members query; its full management screen remains future work.
 
 Pages coordinate state and dialogs. Extract sections with independent requests/state into feature components: Bills has separate reminders, payment orchestration, payment setup/review and amount-summary components; Expenses has its own recurring-schedule controls. Avoid growing pages into duplicate form implementations.
 
@@ -37,7 +37,7 @@ Cross-feature imports should express a real domain relationship. For example, Bi
 
 - `components/ui/`: local shadcn/Base UI primitives. Keep feature requests/business logic out of these files. The shadcn configuration points to `lib/utils.ts` for `cn`. Controlled dropdowns use the shared `components/ui/form-select.tsx` wrapper around the local shadcn Select. It accepts labeled options and preserves explicit empty-string filter values.
 - `components/brand/`: the shared wordmark/icon components. Active files live under `public/brand/`; original legacy/design assets are retained separately.
-- `components/shell/`: header/sidebar/layout and `navigation.ts`.
+- `components/shell/`: header/sidebar/layout and `navigation.ts`. The shell composes the local shadcn Sidebar provider, menus and trigger; mobile navigation uses its Sheet. Shared Sidebar context lives in `components/ui/sidebar-context.ts`, and responsive media subscriptions in `hooks/use-mobile.ts`.
 - `lib/finance/`: currency precision, money formatting/validation, split calculations and shared split/recurrence contracts. It has no dependency on Expenses or Bills.
 - `lib/date.ts`: UTC display dates and local calendar defaults.
 - `lib/format.ts`: display labels, person names and user identifiers.

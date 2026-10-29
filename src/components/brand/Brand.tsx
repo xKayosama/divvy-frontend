@@ -2,14 +2,14 @@
 export function Brand() {
   return (
     <span
-      className="relative block h-13 w-38 shrink-0"
+      className="relative block h-12 w-38 shrink-0"
       role="img"
       aria-label="Divvy"
     >
       <img
         src="/brand/wordmark.png"
         alt=""
-        className="absolute -left-7.5 -top-1.5 h-17.5 w-52.5 max-w-none object-contain"
+        className="absolute -left-7.5 top-1/2 h-17.5 w-52.5 -translate-y-1/2 max-w-none object-contain"
       />
     </span>
   );
