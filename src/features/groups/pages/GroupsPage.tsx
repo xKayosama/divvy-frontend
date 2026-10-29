@@ -108,13 +108,14 @@ export default function GroupsPage() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((group) => (
-              <button
+              <Button
+                variant="outline"
                 key={group.id}
                 onClick={() => {
                   dispatch(setSelectedGroup(group));
                   navigate('/dashboard');
                 }}
-                className="group rounded-2xl border bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-md focus-visible:outline-2 focus-visible:outline-primary"
+                className="group block h-auto w-full rounded-2xl p-6 text-left whitespace-normal shadow-sm"
               >
                 <div className="mb-7 flex items-center justify-between">
                   <span className="grid size-12 place-items-center rounded-2xl bg-secondary text-primary">
@@ -132,7 +133,7 @@ export default function GroupsPage() {
                   Open group
                   <ArrowUpRight className="size-5 transition group-hover:translate-x-1" />
                 </div>
-              </button>
+              </Button>
             ))}
           </div>
         )}

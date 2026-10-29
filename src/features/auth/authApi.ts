@@ -5,6 +5,8 @@ import type {
   RegisterRequest,
   LoginRequest,
   MeResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
 } from './types';
 
 export const authApi = api.injectEndpoints({
@@ -28,6 +30,25 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
+    updateProfile: builder.mutation<
+      UpdateProfileResponse,
+      UpdateProfileRequest
+    >({
+      query: (body) => ({ url: '/auth/me', method: 'PATCH', body }),
+      invalidatesTags: (result) =>
+        result
+          ? [
+              'Auth',
+              'Group',
+              'Member',
+              'Dashboard',
+              'Expense',
+              'Bill',
+              'Balance',
+              'Settlement',
+            ]
+          : [],
+    }),
     getMe: builder.query<MeResponse, void>({
       query: () => '/auth/me',
       providesTags: ['Auth'],
@@ -40,4 +61,5 @@ export const {
   useRegisterMutation,
   useLoginMutation,
   useGetMeQuery,
+  useUpdateProfileMutation,
 } = authApi;

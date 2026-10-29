@@ -62,6 +62,44 @@ Backend limits retained: paid source bills cannot be edited/deleted, so their re
 
 Validation: build, full lint and all 19 regression tests pass. Existing fixture-backed Groups, Expenses and Bills browser suites pass after the moves. A focused session check also verified login token persistence, logout/account cache isolation, reload restoration, legacy route compatibility and 401 cleanup. Backend contracts and cookie behavior were not changed.
 
+## Shared button consistency
+
+Visible action controls now reuse the existing shadcn/Base UI Button: group cards and selection, logout, session retry, expense/bill detail rows and bill reminders. Existing outline, ghost, secondary and link variants provide theme, focus and disabled styling; content rows keep automatic height and wrapping. Navigation links retain link semantics, and the mobile navigation backdrop remains a structural dismiss target.
+
+Validation: build, lint and all 19 regression tests pass. Isolated browser fixtures verified group cards, expense rows and bill rows render with the shared Button, including a visual review of the bills screen. Hosted data and API contracts are unchanged.
+
+## shadcn navigation shell
+
+Replaced the custom sidebar, backdrop and mobile open-state wiring with the official shadcn/Base UI Sidebar provider, header, content, footer, groups, menu items and trigger. Route links retain native link semantics and active state; selecting a link dismisses the mobile Sheet. Existing logos, green/mint sidebar tokens, group selection and logout handling are preserved. Desktop navigation can collapse through the header trigger or Cmd/Ctrl+B. The generated responsive hook uses a media-query subscription, and context is separated for Fast Refresh.
+
+Validation: build, lint and 19 regression tests pass. Local fixture browser checks cover desktop collapse and shortcut, mobile keyboard opening, Escape dismissal, navigation closing the Sheet and no horizontal overflow at 390px. Backend behavior is unchanged.
+
+## Header group switcher and collapsed navigation
+
+The Groups-owned switcher lives in the top bar beside the Sidebar trigger. It uses a shadcn Button and DropdownMenu with group radio items, outlined icon tiles, single-line group names and an All groups footer action. The trigger shows group name and currency, and the menu opens below it. Loading, empty and retry states remain available, and selection uses the existing Redux/storage listeners.
+
+The Sidebar header displays the Divvy wordmark when expanded and the existing brand icon in the collapsed desktop rail. Navigation and account icons stay centered with accessible names and hover labels. Mobile retains the full branded Sheet; group switching is available directly from the top bar.
+
+Validation: build, lint and 19 tests pass. Local fixtures verified desktop/mobile group switching, persisted selection, switching while the Sidebar is collapsed, Escape dismissal, restored mobile branding and no horizontal overflow.
+
+## Dashboard color refinement
+
+Dashboard totals use reusable Card tones: a deep-green brand gradient for total expenses, soft mint for paid totals and a brighter mint activity card. Section headers have subtle mint surfaces. Pending bills use semantic amber warning tokens, overdue bills retain red and paid bills retain green; upcoming bill labels follow the same status colors. Light and dark warning tokens live in the shared theme. Amounts, queries and balance calculations are unchanged.
+
+Validation: build and lint pass. Isolated dashboard fixtures verified populated totals, balances and bill states on desktop and 390px mobile without horizontal overflow; dark-mode colors and computed text/background values were also checked.
+
+## Consistent page cards
+
+Expenses and Bills use the same local shadcn Card/CardContent/CardHeader composition and brand/mint tones as Dashboard. Summary values use matching typography and icon containers. Filters, reminders and list surfaces share themed corners, shadows and padding; list headers use the same subtle mint tint. Named filter/list regions and existing data actions are preserved. Bill reminder cards stack on narrow screens.
+
+Validation: build, lint and 19 regression tests pass. Fixture browser review verified matching themed corner radii, expanded bill reminders and desktop/390px mobile layouts without horizontal overflow.
+
+## Header account menu
+
+The header name/avatar is a shadcn dropdown trigger with Profile and Logout actions. Profile opens an accessible dialog for updating first and last names through `PATCH /api/auth/me`; email remains read-only. Names are trimmed, required and limited to 100 characters each. A successful response merges the returned names into the current account state, preserves its avatar and session, refreshes affected RTK Query data and updates the header immediately. Saving blocks dismissal; errors preserve the draft for retry. Sign-out behavior is owned by a shared Auth hook used by the menu and existing logout button: successful or expired sessions clear local selection/token/API caches and return to login, while server failures preserve the session and show a retry message. Email-change flows remain separate.
+
+Validation: build, lint and 19 regression tests pass. Local fixture browser checks cover profile prefill, blank-name validation, trimmed request payloads, failed-save retry, pending-save dismissal protection, immediate header updates, saved values on reopening, discarded unsaved changes and expired-session cleanup. The backend profile suite passes 12 tests, and the hosted PATCH route returns the expected unauthenticated 401. No live user profile was modified during testing.
+
 ## Next increments
 
 1. Members/invitations: owner invitation management, recipient consent and member removal UI.

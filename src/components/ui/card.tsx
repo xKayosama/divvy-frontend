@@ -1,17 +1,35 @@
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+
+const cardTones = cva('', {
+  variants: {
+    tone: {
+      default: '',
+      brand: 'bg-brand-spending text-white ring-primary/20',
+      mint: 'bg-secondary text-secondary-foreground ring-primary/15',
+      accent: 'bg-accent text-accent-foreground ring-primary/15',
+    },
+  },
+  defaultVariants: { tone: 'default' },
+});
 
 function Card({
   className,
   size = 'default',
+  tone = 'default',
   ...props
-}: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
+}: React.ComponentProps<'div'> & { size?: 'default' | 'sm' } & VariantProps<
+    typeof cardTones
+  >) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-tone={tone}
       className={cn(
         'group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        cardTones({ tone }),
         className,
       )}
       {...props}

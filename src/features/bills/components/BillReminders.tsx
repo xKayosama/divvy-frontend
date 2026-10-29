@@ -1,3 +1,5 @@
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Bell, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +47,7 @@ export default function BillReminders({
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           {(
             [
               { key: 'overdue', label: 'Overdue' },
@@ -53,59 +55,93 @@ export default function BillReminders({
               { key: 'dueSoon', label: 'Next 7 days' },
             ] as const
           ).map(({ key, label }) => (
-            <div
+            <Card
               key={key}
-              className={`rounded-2xl border p-3 sm:rounded-3xl sm:p-5 ${key === 'dueToday' ? 'bg-brand-spending text-white' : 'bg-card'}`}
+              tone={
+                key === 'dueToday'
+                  ? 'brand'
+                  : key === 'dueSoon'
+                    ? 'mint'
+                    : 'default'
+              }
+              className="min-h-33 rounded-2xl py-0 shadow-sm"
             >
-              <p
-                className={`flex flex-wrap items-center justify-between gap-1 text-xs sm:text-sm ${key === 'dueToday' ? 'text-white/80' : 'text-muted-foreground'}`}
-              >
-                {label}
-                <CalendarDays
-                  className={`size-4 ${key === 'dueToday' ? 'text-accent' : key === 'overdue' ? 'text-destructive' : 'text-primary'}`}
-                />
-              </p>
-              <p
-                className={`mt-3 break-words text-lg sm:mt-4 sm:text-3xl font-semibold ${key === 'overdue' ? 'text-destructive' : ''}`}
-              >
-                {reminders ? money.format(reminders[key].amount) : '—'}
-              </p>
-              <p
-                className={`mt-2 text-xs ${key === 'dueToday' ? 'text-white/75' : 'text-muted-foreground'}`}
-              >
-                {reminders
-                  ? `${reminders[key].count} ${reminders[key].count === 1 ? 'bill' : 'bills'}`
-                  : 'Loading reminders…'}
-                <span className="hidden sm:inline">
-                  {key === 'dueSoon' ? ' · from tomorrow' : ''}
-                </span>
-              </p>
-            </div>
+              <CardContent className="relative p-5">
+                <div className="flex items-center justify-between gap-2 pr-12">
+                  <p
+                    className={cn(
+                      'text-sm font-medium',
+                      key === 'dueToday'
+                        ? 'text-white/80'
+                        : 'text-muted-foreground',
+                    )}
+                  >
+                    {label}
+                  </p>
+                  <span
+                    className={cn(
+                      'absolute right-5 top-5 flex size-10 items-center justify-center rounded-xl',
+                      key === 'dueToday'
+                        ? 'bg-white/10 text-accent'
+                        : key === 'overdue'
+                          ? 'bg-destructive/10 text-destructive'
+                          : 'bg-primary/10 text-primary',
+                    )}
+                  >
+                    <CalendarDays className="size-5" />
+                  </span>
+                </div>
+                <p
+                  className={cn(
+                    'mt-3 break-words text-2xl font-semibold tracking-tight',
+                    key === 'overdue' && 'text-destructive',
+                    key === 'dueSoon' && 'text-primary',
+                  )}
+                >
+                  {reminders ? money.format(reminders[key].amount) : '—'}
+                </p>
+                <p
+                  className={cn(
+                    'mt-3 text-xs',
+                    key === 'dueToday'
+                      ? 'text-white/80'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  {reminders
+                    ? `${reminders[key].count} ${reminders[key].count === 1 ? 'bill' : 'bills'}`
+                    : 'Loading reminders…'}
+                  {key === 'dueSoon' && ' · from tomorrow'}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
       {showReminders && reminders && (
-        <div className="grid gap-4 rounded-3xl border bg-card p-5 sm:grid-cols-3">
-          {(
-            [
-              { key: 'overdue', label: 'Overdue' },
-              { key: 'dueToday', label: 'Due today' },
-              { key: 'dueSoon', label: 'Next 7 days' },
-            ] as const
-          ).map(({ key, label }) => (
-            <ReminderList
-              key={key}
-              title={label}
-              bucket={reminders[key]}
-              currency={currency}
-              onOpen={onOpen}
-            />
-          ))}
-          <p className="text-xs leading-5 text-muted-foreground sm:col-span-3">
-            Up to five bills per section. Reminders follow UTC calendar dates
-            and refresh every minute.
-          </p>
-        </div>
+        <Card className="rounded-2xl py-0 shadow-sm">
+          <CardContent className="grid gap-4 p-5 sm:grid-cols-3">
+            {(
+              [
+                { key: 'overdue', label: 'Overdue' },
+                { key: 'dueToday', label: 'Due today' },
+                { key: 'dueSoon', label: 'Next 7 days' },
+              ] as const
+            ).map(({ key, label }) => (
+              <ReminderList
+                key={key}
+                title={label}
+                bucket={reminders[key]}
+                currency={currency}
+                onOpen={onOpen}
+              />
+            ))}
+            <p className="text-xs leading-5 text-muted-foreground sm:col-span-3">
+              Up to five bills per section. Reminders follow UTC calendar dates
+              and refresh every minute.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </section>
   );
@@ -133,9 +169,10 @@ function ReminderList({
         </p>
       ) : (
         bucket.bills.map((bill) => (
-          <button
+          <Button
+            variant="secondary"
             key={bill._id}
-            className="block w-full rounded-xl bg-muted p-3 text-left outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-primary"
+            className="block h-auto w-full p-3 text-left whitespace-normal"
             onClick={() => onOpen(bill._id)}
           >
             <span className="block truncate text-sm font-medium">
@@ -145,7 +182,7 @@ function ReminderList({
               {currencyMoney(currency).format(bill.amount)} ·{' '}
               {formatDate(bill.dueDate)}
             </span>
-          </button>
+          </Button>
         ))
       )}
     </section>
