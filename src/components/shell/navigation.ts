@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   FileText,
   LayoutDashboard,
+  Mail,
   Receipt,
   Scale,
   Users,
@@ -28,6 +29,7 @@ export const navigation = [
     path: '/members',
     icon: Users,
   },
+  { label: 'Invitations', path: '/invitations', icon: Mail },
   {
     label: 'Balances',
     path: '/balances',

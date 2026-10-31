@@ -1,6 +1,7 @@
+import { buttonVariants } from '@/components/ui/button-variants';
 import { Brand } from '@/components/brand/Brand';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Search, Users, Wallet } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setSelectedGroup } from '@/features/groups/groupSlice';
@@ -25,7 +26,15 @@ export default function GroupsPage() {
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
           <Brand />
-          <LogoutButton />
+          <div className="flex items-center gap-2">
+            <Link
+              to="/invitations"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Invitations
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
       </header>
       <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-16">

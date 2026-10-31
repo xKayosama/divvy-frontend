@@ -47,6 +47,9 @@ const ProtectedRoute = () => {
       </main>
     );
   }
+  // Account-dependent pages must wait for setUser to populate Redux.
+  if (!user) return null;
+
   return <Outlet />;
 };
 

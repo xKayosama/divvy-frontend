@@ -34,6 +34,7 @@ export const api = createApi({
     'Auth',
     'Group',
     'Member',
+    'Invitation',
     'Expense',
     'Bill',
     'Balance',

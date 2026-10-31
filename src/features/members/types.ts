@@ -23,3 +23,26 @@ export interface MembersResponse {
     members: GroupMember[];
   };
 }
+
+export type InvitationStatus =
+  'PENDING' | 'EXPIRED' | 'ACCEPTED' | 'DECLINED' | 'REVOKED';
+export interface Invitation {
+  id: string;
+  email: string;
+  status: InvitationStatus;
+  createdAt: string;
+  expiresAt: string;
+  group: { id: string; name: string; currency: string; icon?: string };
+}
+export interface InvitationsResponse {
+  success: boolean;
+  data: { invitations: Invitation[] };
+}
+export interface InvitationResponse {
+  success: boolean;
+  message?: string;
+  data: { invitation: Invitation };
+}
+export interface CreatedInvitationResponse extends InvitationResponse {
+  data: { invitation: Invitation; code: string };
+}

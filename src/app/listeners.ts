@@ -1,3 +1,4 @@
+import { clearPaymentAttempts } from '@/features/settlements/lib/payment-storage';
 import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { api } from '@/services/api';
 import { storeToken, removeStoredToken } from '@/services/session';
@@ -16,6 +17,7 @@ appListeners.startListening({
   effect: (action, listener) => {
     if (setCredentials.match(action)) storeToken(action.payload.token);
     else removeStoredToken();
+    clearPaymentAttempts();
     listener.dispatch(clearSelectedGroup());
     listener.dispatch(api.util.resetApiState());
   },

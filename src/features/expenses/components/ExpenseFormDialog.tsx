@@ -294,10 +294,10 @@ function ExpenseForm({
   }
   return (
     <DialogContent
-      className="flex max-h-[92svh] flex-col gap-0 overflow-hidden rounded-3xl bg-card p-0 text-card-foreground sm:max-w-3xl"
+      className="flex max-h-[92svh] flex-col gap-0 overflow-hidden rounded-3xl bg-card p-0 text-card-foreground sm:max-w-2xl"
       showCloseButton={!saving}
     >
-      <DialogHeader className="border-b px-6 py-5">
+      <DialogHeader className="shrink-0 border-b px-6 py-5">
         <p className="text-xs font-semibold uppercase tracking-[.16em] text-primary">
           Shared expenses · {currency}
         </p>
@@ -313,436 +313,449 @@ function ExpenseForm({
         className="flex min-h-0 flex-1 flex-col"
         aria-busy={saving}
       >
-        <fieldset
-          disabled={saving}
-          className="min-h-0 flex-1 space-y-6 overflow-y-auto p-6"
-        >
-          {!members.length && (
-            <p
-              role="alert"
-              className="rounded-xl bg-destructive/10 p-3 text-destructive"
-            >
-              No active group members are available.
-            </p>
-          )}
-          <div className="grid gap-4 sm:grid-cols-[1.5fr_1fr]">
-            <div className={fieldStyle}>
-              <label
-                htmlFor="expense-description"
-                className="text-sm font-medium"
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <fieldset disabled={saving} className="min-w-0 space-y-6 p-6">
+            {!members.length && (
+              <p
+                role="alert"
+                className="rounded-xl bg-destructive/10 p-3 text-destructive"
               >
-                Description
-              </label>
-              <Input
-                id="expense-description"
-                className="h-11"
-                placeholder="What was it for?"
-                required
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className={fieldStyle}>
-              <label htmlFor="expense-amount" className="text-sm font-medium">
-                Amount ({currency})
-              </label>
-              <Input
-                id="expense-amount"
-                type="number"
-                className="h-11"
-                required
-                min={money.step}
-                step={money.step}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder={(0).toFixed(money.digits)}
-              />
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className={fieldStyle}>
-              <label htmlFor="expense-category" className="text-sm font-medium">
-                Category
-              </label>
-              <FormSelect
-                id="expense-category"
-                value={category}
-                onValueChange={(value) => setCategory(value as ExpenseCategory)}
-                options={expenseCategories.map((value) => ({
-                  value,
-                  label: categoryLabel(value),
-                }))}
-              />
-            </div>
-            <div className={fieldStyle}>
-              <label htmlFor="expense-payer" className="text-sm font-medium">
-                Paid by
-              </label>
-              <FormSelect
-                id="expense-payer"
-                value={payer}
-                onValueChange={setPayer}
-                required
-                options={[
-                  ...(!knownIds.has(payer)
-                    ? [{ value: payer, label: 'Choose an active member' }]
-                    : []),
-                  ...members.map((member) => ({
-                    value: member._id,
-                    label: personName(member),
-                  })),
-                ]}
-              />
-            </div>
-            <div className={fieldStyle}>
-              <label htmlFor="expense-date" className="text-sm font-medium">
-                Expense date (UTC)
-              </label>
-              <Input
-                id="expense-date"
-                type="date"
-                className="h-11"
-                required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                disabled={!!expense?.recurring}
-              />
-              {expense?.recurring && (
-                <p className="text-xs text-muted-foreground">
-                  The first date anchors this schedule.
-                </p>
-              )}
-            </div>
-          </div>
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold">How should we split it?</h3>
-              <span className="text-xs text-muted-foreground">
-                {currency} · {money.digits} decimal places
-              </span>
-            </div>
-            <div
-              className="grid grid-cols-2 gap-2 sm:grid-cols-5"
-              role="group"
-              aria-label="Split method"
-            >
-              {(Object.keys(splitLabels) as ExpenseSplitType[]).map((type) => (
-                <Button
-                  key={type}
-                  type="button"
-                  variant={type === splitType ? 'default' : 'outline'}
-                  className="h-10"
-                  aria-pressed={type === splitType}
-                  onClick={() => changeType(type)}
-                >
-                  {splitLabels[type]}
-                </Button>
-              ))}
-            </div>
-            {splitType !== 'ITEMIZED' ? (
-              <div className="divide-y overflow-hidden rounded-2xl border">
-                {[
-                  ...new Set([
-                    ...members.map((member) => member._id),
-                    ...selected,
-                  ]),
-                ].map((id) => (
-                  <div key={id} className="flex items-center gap-3 px-4 py-3">
-                    <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-primary"
-                        checked={selected.includes(id)}
-                        onChange={() =>
-                          setSelected((current) =>
-                            current.includes(id)
-                              ? current.filter((value) => value !== id)
-                              : [...current, id],
-                          )
-                        }
-                      />
-                      <span className="truncate">
-                        {memberName(id)}
-                        {!knownIds.has(id) && ' (unavailable)'}
-                      </span>
-                    </label>
-                    {selected.includes(id) && splitType !== 'EQUAL' && (
-                      <div className="flex w-32 shrink-0 items-center gap-2">
-                        <Input
-                          aria-label={`${splitLabels[splitType]} for ${memberName(id)}`}
-                          type="number"
-                          min={splitType === 'SHARES' ? 1 : 0}
-                          max={
-                            splitType === 'PERCENTAGE'
-                              ? 100
-                              : splitType === 'SHARES'
-                                ? 1000000
-                                : undefined
-                          }
-                          step={
-                            splitType === 'SHARES'
-                              ? 1
-                              : splitType === 'PERCENTAGE'
-                                ? 0.01
-                                : money.step
-                          }
-                          value={
-                            values[id] ?? (splitType === 'SHARES' ? '1' : '')
-                          }
-                          onChange={(e) =>
-                            setValues((current) => ({
-                              ...current,
-                              [id]: e.target.value,
-                            }))
-                          }
-                          placeholder="0"
-                        />
-                        {splitType === 'PERCENTAGE' && <span>%</span>}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Enter each line’s total, including its quantity. Assign who
-                  shared it. Quantity is informational; the line total is not
-                  multiplied.
-                </p>
-                {items.map((item, index) => (
-                  <div
-                    key={item.key}
-                    className="space-y-3 rounded-2xl border bg-background/60 p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-semibold">
-                        Item {index + 1}
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Remove item ${index + 1}`}
-                        disabled={items.length === 1}
-                        onClick={() =>
-                          setItems((current) =>
-                            current.filter((value) => value.key !== item.key),
-                          )
-                        }
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
-                      <Input
-                        aria-label={`Item ${index + 1} description`}
-                        placeholder="Item description"
-                        className="col-span-2 sm:col-span-1"
-                        maxLength={200}
-                        required
-                        value={item.description}
-                        onChange={(e) =>
-                          patchItem(item.key, { description: e.target.value })
-                        }
-                      />
-                      <Input
-                        aria-label={`Item ${index + 1} quantity`}
-                        type="number"
-                        min="0.001"
-                        max="1000000"
-                        step="0.001"
-                        required
-                        value={item.quantity}
-                        onChange={(e) =>
-                          patchItem(item.key, { quantity: e.target.value })
-                        }
-                      />
-                      <Input
-                        aria-label={`Item ${index + 1} line total`}
-                        type="number"
-                        min="0"
-                        step={money.step}
-                        required
-                        placeholder="Line total"
-                        value={item.amount}
-                        onChange={(e) =>
-                          patchItem(item.key, { amount: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        ...new Set([
-                          ...members.map((member) => member._id),
-                          ...item.memberIds,
-                        ]),
-                      ].map((id) => (
-                        <label
-                          key={id}
-                          className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs"
-                        >
-                          <input
-                            type="checkbox"
-                            className="accent-primary"
-                            checked={item.memberIds.includes(id)}
-                            onChange={() =>
-                              patchItem(item.key, {
-                                memberIds: item.memberIds.includes(id)
-                                  ? item.memberIds.filter(
-                                      (value) => value !== id,
-                                    )
-                                  : [...item.memberIds, id],
-                              })
-                            }
-                          />
-                          {memberName(id)}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={items.length >= 100}
-                  onClick={() => setItems((current) => [...current, newItem()])}
-                >
-                  <Plus className="size-4" />
-                  Add item
-                </Button>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {(['tax', 'tip'] as const).map((key) => (
-                    <div key={key} className="space-y-2">
-                      <label
-                        htmlFor={`expense-${key}`}
-                        className="text-sm font-medium"
-                      >
-                        {key === 'tax' ? 'Tax' : 'Tip'} ({currency}, optional)
-                      </label>
-                      <Input
-                        id={`expense-${key}`}
-                        type="number"
-                        min="0"
-                        step={money.step}
-                        value={key === 'tax' ? tax : tip}
-                        onChange={(e) =>
-                          (key === 'tax' ? setTax : setTip)(e.target.value)
-                        }
-                      />
-                      <FormSelect
-                        aria-label={`${key} allocation`}
-                        value={key === 'tax' ? taxAllocation : tipAllocation}
-                        onValueChange={(value) =>
-                          (key === 'tax' ? setTaxAllocation : setTipAllocation)(
-                            value as 'EQUAL' | 'PROPORTIONAL',
-                          )
-                        }
-                        options={[
-                          {
-                            value: 'PROPORTIONAL',
-                            label: 'In proportion to item shares',
-                          },
-                          {
-                            value: 'EQUAL',
-                            label: 'Equally between assigned members',
-                          },
-                        ]}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+                No active group members are available.
+              </p>
             )}
-          </section>
-          <section
-            className="rounded-2xl bg-secondary p-4"
-            aria-label="Split preview"
-            aria-live="polite"
-          >
-            <h3 className="mb-3 text-sm font-semibold text-secondary-foreground">
-              Everyone’s share
-            </h3>
-            {preview.error ? (
-              <p className="text-sm text-muted-foreground">{preview.error}</p>
-            ) : (
-              <div className="space-y-2">
-                {preview.participants?.map((p) => (
-                  <div
-                    key={p.userId}
-                    className="flex items-center justify-between gap-3 text-sm"
-                  >
-                    <span>{memberName(p.userId)}</span>
-                    <strong>{money.format(p.amount)}</strong>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-          {!expense && (
-            <section className="grid gap-4 rounded-2xl border p-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-[1.5fr_1fr]">
               <div className={fieldStyle}>
                 <label
-                  htmlFor="expense-frequency"
+                  htmlFor="expense-description"
                   className="text-sm font-medium"
                 >
-                  Repeat this expense
+                  Description
+                </label>
+                <Input
+                  id="expense-description"
+                  className="h-11"
+                  placeholder="What was it for?"
+                  required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div className={fieldStyle}>
+                <label htmlFor="expense-amount" className="text-sm font-medium">
+                  Amount ({currency})
+                </label>
+                <Input
+                  id="expense-amount"
+                  type="number"
+                  className="h-11"
+                  required
+                  min={money.step}
+                  step={money.step}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder={(0).toFixed(money.digits)}
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className={fieldStyle}>
+                <label
+                  htmlFor="expense-category"
+                  className="text-sm font-medium"
+                >
+                  Category
                 </label>
                 <FormSelect
-                  id="expense-frequency"
-                  value={frequency}
+                  id="expense-category"
+                  value={category}
                   onValueChange={(value) =>
-                    setFrequency(value as Frequency | '')
+                    setCategory(value as ExpenseCategory)
                   }
+                  options={expenseCategories.map((value) => ({
+                    value,
+                    label: categoryLabel(value),
+                  }))}
+                />
+              </div>
+              <div className={fieldStyle}>
+                <label htmlFor="expense-payer" className="text-sm font-medium">
+                  Paid by
+                </label>
+                <FormSelect
+                  id="expense-payer"
+                  value={payer}
+                  onValueChange={setPayer}
+                  required
                   options={[
-                    { value: '', label: 'Does not repeat' },
-                    { value: 'WEEKLY', label: 'Weekly' },
-                    { value: 'MONTHLY', label: 'Monthly' },
-                    { value: 'YEARLY', label: 'Yearly' },
+                    ...(!knownIds.has(payer)
+                      ? [{ value: payer, label: 'Choose an active member' }]
+                      : []),
+                    ...members.map((member) => ({
+                      value: member._id,
+                      label: personName(member),
+                    })),
                   ]}
                 />
               </div>
-              {frequency && (
-                <div className={fieldStyle}>
-                  <label htmlFor="expense-end" className="text-sm font-medium">
-                    Repeat until (optional)
-                  </label>
-                  <Input
-                    id="expense-end"
-                    className="h-11"
-                    type="date"
-                    min={date}
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
+              <div className={fieldStyle}>
+                <label htmlFor="expense-date" className="text-sm font-medium">
+                  Expense date (UTC)
+                </label>
+                <Input
+                  id="expense-date"
+                  type="date"
+                  className="h-11"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  disabled={!!expense?.recurring}
+                />
+                {expense?.recurring && (
+                  <p className="text-xs text-muted-foreground">
+                    The first date anchors this schedule.
+                  </p>
+                )}
+              </div>
+            </div>
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">How should we split it?</h3>
+                <span className="text-xs text-muted-foreground">
+                  {currency} · {money.digits} decimal places
+                </span>
+              </div>
+              <div
+                className="grid grid-cols-2 gap-2 sm:grid-cols-5"
+                role="group"
+                aria-label="Split method"
+              >
+                {(Object.keys(splitLabels) as ExpenseSplitType[]).map(
+                  (type) => (
+                    <Button
+                      key={type}
+                      type="button"
+                      variant={type === splitType ? 'default' : 'outline'}
+                      className="h-10"
+                      aria-pressed={type === splitType}
+                      onClick={() => changeType(type)}
+                    >
+                      {splitLabels[type]}
+                    </Button>
+                  ),
+                )}
+              </div>
+              {splitType !== 'ITEMIZED' ? (
+                <div className="divide-y overflow-hidden rounded-2xl border">
+                  {[
+                    ...new Set([
+                      ...members.map((member) => member._id),
+                      ...selected,
+                    ]),
+                  ].map((id) => (
+                    <div key={id} className="flex items-center gap-3 px-4 py-3">
+                      <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-primary"
+                          checked={selected.includes(id)}
+                          onChange={() =>
+                            setSelected((current) =>
+                              current.includes(id)
+                                ? current.filter((value) => value !== id)
+                                : [...current, id],
+                            )
+                          }
+                        />
+                        <span className="truncate">
+                          {memberName(id)}
+                          {!knownIds.has(id) && ' (unavailable)'}
+                        </span>
+                      </label>
+                      {selected.includes(id) && splitType !== 'EQUAL' && (
+                        <div className="flex w-32 shrink-0 items-center gap-2">
+                          <Input
+                            aria-label={`${splitLabels[splitType]} for ${memberName(id)}`}
+                            type="number"
+                            min={splitType === 'SHARES' ? 1 : 0}
+                            max={
+                              splitType === 'PERCENTAGE'
+                                ? 100
+                                : splitType === 'SHARES'
+                                  ? 1000000
+                                  : undefined
+                            }
+                            step={
+                              splitType === 'SHARES'
+                                ? 1
+                                : splitType === 'PERCENTAGE'
+                                  ? 0.01
+                                  : money.step
+                            }
+                            value={
+                              values[id] ?? (splitType === 'SHARES' ? '1' : '')
+                            }
+                            onChange={(e) =>
+                              setValues((current) => ({
+                                ...current,
+                                [id]: e.target.value,
+                              }))
+                            }
+                            placeholder="0"
+                          />
+                          {splitType === 'PERCENTAGE' && <span>%</span>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Enter each line’s total, including its quantity. Assign who
+                    shared it. Quantity is informational; the line total is not
+                    multiplied.
+                  </p>
+                  {items.map((item, index) => (
+                    <div
+                      key={item.key}
+                      className="space-y-3 rounded-2xl border bg-background/60 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold">
+                          Item {index + 1}
+                        </h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Remove item ${index + 1}`}
+                          disabled={items.length === 1}
+                          onClick={() =>
+                            setItems((current) =>
+                              current.filter((value) => value.key !== item.key),
+                            )
+                          }
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
+                        <Input
+                          aria-label={`Item ${index + 1} description`}
+                          placeholder="Item description"
+                          className="col-span-2 sm:col-span-1"
+                          maxLength={200}
+                          required
+                          value={item.description}
+                          onChange={(e) =>
+                            patchItem(item.key, { description: e.target.value })
+                          }
+                        />
+                        <Input
+                          aria-label={`Item ${index + 1} quantity`}
+                          type="number"
+                          min="0.001"
+                          max="1000000"
+                          step="0.001"
+                          required
+                          value={item.quantity}
+                          onChange={(e) =>
+                            patchItem(item.key, { quantity: e.target.value })
+                          }
+                        />
+                        <Input
+                          aria-label={`Item ${index + 1} line total`}
+                          type="number"
+                          min="0"
+                          step={money.step}
+                          required
+                          placeholder="Line total"
+                          value={item.amount}
+                          onChange={(e) =>
+                            patchItem(item.key, { amount: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          ...new Set([
+                            ...members.map((member) => member._id),
+                            ...item.memberIds,
+                          ]),
+                        ].map((id) => (
+                          <label
+                            key={id}
+                            className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs"
+                          >
+                            <input
+                              type="checkbox"
+                              className="accent-primary"
+                              checked={item.memberIds.includes(id)}
+                              onChange={() =>
+                                patchItem(item.key, {
+                                  memberIds: item.memberIds.includes(id)
+                                    ? item.memberIds.filter(
+                                        (value) => value !== id,
+                                      )
+                                    : [...item.memberIds, id],
+                                })
+                              }
+                            />
+                            {memberName(id)}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={items.length >= 100}
+                    onClick={() =>
+                      setItems((current) => [...current, newItem()])
+                    }
+                  >
+                    <Plus className="size-4" />
+                    Add item
+                  </Button>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {(['tax', 'tip'] as const).map((key) => (
+                      <div key={key} className="space-y-2">
+                        <label
+                          htmlFor={`expense-${key}`}
+                          className="text-sm font-medium"
+                        >
+                          {key === 'tax' ? 'Tax' : 'Tip'} ({currency}, optional)
+                        </label>
+                        <Input
+                          id={`expense-${key}`}
+                          type="number"
+                          min="0"
+                          step={money.step}
+                          value={key === 'tax' ? tax : tip}
+                          onChange={(e) =>
+                            (key === 'tax' ? setTax : setTip)(e.target.value)
+                          }
+                        />
+                        <FormSelect
+                          aria-label={`${key} allocation`}
+                          value={key === 'tax' ? taxAllocation : tipAllocation}
+                          onValueChange={(value) =>
+                            (key === 'tax'
+                              ? setTaxAllocation
+                              : setTipAllocation)(
+                              value as 'EQUAL' | 'PROPORTIONAL',
+                            )
+                          }
+                          options={[
+                            {
+                              value: 'PROPORTIONAL',
+                              label: 'In proportion to item shares',
+                            },
+                            {
+                              value: 'EQUAL',
+                              label: 'Equally between assigned members',
+                            },
+                          ]}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-              <p className="text-xs leading-5 text-muted-foreground sm:col-span-2">
-                {frequency
-                  ? 'The same amount and split will be recorded automatically. Past start dates can generate missed entries. Manage the schedule from expense details.'
-                  : 'Choose a schedule for regular shared costs such as rent or subscriptions.'}
-              </p>
             </section>
-          )}
-          <div className={fieldStyle}>
-            <label htmlFor="expense-notes" className="text-sm font-medium">
-              Notes (optional)
-            </label>
-            <textarea
-              id="expense-notes"
-              className="min-h-20 w-full rounded-xl border bg-card p-3 text-sm outline-none focus:border-primary"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Anything the group should know?"
-            />
-          </div>
-          {unavailable && (
-            <p className="text-sm text-destructive">
-              A payer or participant is no longer active. Update the selection
-              before saving.
-            </p>
-          )}
-        </fieldset>
+            <section
+              className="rounded-2xl bg-secondary p-4"
+              aria-label="Split preview"
+              aria-live="polite"
+            >
+              <h3 className="mb-3 text-sm font-semibold text-secondary-foreground">
+                Everyone’s share
+              </h3>
+              {preview.error ? (
+                <p className="text-sm text-muted-foreground">{preview.error}</p>
+              ) : (
+                <div className="space-y-2">
+                  {preview.participants?.map((p) => (
+                    <div
+                      key={p.userId}
+                      className="flex items-center justify-between gap-3 text-sm"
+                    >
+                      <span>{memberName(p.userId)}</span>
+                      <strong>{money.format(p.amount)}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+            {!expense && (
+              <section className="grid gap-4 rounded-2xl border p-4 sm:grid-cols-2">
+                <div className={fieldStyle}>
+                  <label
+                    htmlFor="expense-frequency"
+                    className="text-sm font-medium"
+                  >
+                    Repeat this expense
+                  </label>
+                  <FormSelect
+                    id="expense-frequency"
+                    value={frequency}
+                    onValueChange={(value) =>
+                      setFrequency(value as Frequency | '')
+                    }
+                    options={[
+                      { value: '', label: 'Does not repeat' },
+                      { value: 'WEEKLY', label: 'Weekly' },
+                      { value: 'MONTHLY', label: 'Monthly' },
+                      { value: 'YEARLY', label: 'Yearly' },
+                    ]}
+                  />
+                </div>
+                {frequency && (
+                  <div className={fieldStyle}>
+                    <label
+                      htmlFor="expense-end"
+                      className="text-sm font-medium"
+                    >
+                      Repeat until (optional)
+                    </label>
+                    <Input
+                      id="expense-end"
+                      className="h-11"
+                      type="date"
+                      min={date}
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+                )}
+                <p className="text-xs leading-5 text-muted-foreground sm:col-span-2">
+                  {frequency
+                    ? 'The same amount and split will be recorded automatically. Past start dates can generate missed entries. Manage the schedule from expense details.'
+                    : 'Choose a schedule for regular shared costs such as rent or subscriptions.'}
+                </p>
+              </section>
+            )}
+            <div className={fieldStyle}>
+              <label htmlFor="expense-notes" className="text-sm font-medium">
+                Notes (optional)
+              </label>
+              <textarea
+                id="expense-notes"
+                className="min-h-20 w-full rounded-xl border bg-card p-3 text-sm outline-none focus:border-primary"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Anything the group should know?"
+              />
+            </div>
+            {unavailable && (
+              <p className="text-sm text-destructive">
+                A payer or participant is no longer active. Update the selection
+                before saving.
+              </p>
+            )}
+          </fieldset>
+        </div>
         {error && (
           <p
             role="alert"

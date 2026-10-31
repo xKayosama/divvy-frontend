@@ -100,12 +100,39 @@ The header name/avatar is a shadcn dropdown trigger with Profile and Logout acti
 
 Validation: build, lint and 19 regression tests pass. Local fixture browser checks cover profile prefill, blank-name validation, trimmed request payloads, failed-save retry, pending-save dismissal protection, immediate header updates, saved values on reopening, discarded unsaved changes and expired-session cleanup. The backend profile suite passes 12 tests, and the hosted PATCH route returns the expected unauthenticated 401. No live user profile was modified during testing.
 
+## Members and invitations
+
+- Added the lazy Members route with a searchable roster, role filter, shadcn avatars/badges and owner-only invite/removal controls. Management permissions come from the current authenticated account's active roster membership, not the stored group role. Owners cannot remove themselves or another owner through the UI.
+- Owner invitations support normalized email entry, creation errors, the one-time code display/copy flow, status filtering, expiry labels and confirmed revocation. Member removal requires confirmation, preserves server errors for retry and refreshes member/group/financial caches.
+- Added a standalone Invitations route, accessible from both the Groups page and sidebar even with no selected group. Recipients can inspect an owner-shared code, review pending invitations and explicitly accept or decline. Lookup never joins automatically. Acceptance requires the code and account matching the invited email.
+- Accept, decline and revoke send the exact `createdAt` generation from the displayed invitation. Stale/replaced/expired responses require refreshing instead of blindly replaying an old request. Success refreshes group and invitation caches; joining does not silently change the selected group.
+- Reused existing Card, PageHeader, FormSelect, Field, Dialog, Input, Button, Skeleton and Avatar components. Added themed local shadcn Badge, Alert and Empty primitives. No email-editing, role-changing, owner-transfer or leave-group features were added.
+
+Backend readiness: the existing `/groups/:id/members`, `/groups/:id/invitations` and `/invitations` routes support this increment; direct member addition is retired (410). The backend invitation suite passes all 14 tests. The hosted incoming endpoint responds with the expected unauthenticated 401. Real authenticated database writes were not exercised during UI testing.
+
+Backend limits: invitation codes are returned only when created, expire after seven days and must be shared manually; the invitation service does not send emails. Recipient access is scoped to the authenticated email. Owner and incoming lists return at most 100 recent entries; there is no invitation pagination. Existing memberships are made inactive when removed.
+
+Validation: build and lint pass, along with all 23 frontend regression tests. Isolated desktop/mobile browser flows cover owner permissions, search, invalid/duplicate email, one-time code display, normalized payloads, revocation generation, member-removal failure/retry, ordinary-member restrictions, inbox access with no memberships, invalid/wrong-account lookup, code-required acceptance, generation-aware accept/decline, stale/expired recovery, query-error retry and no horizontal overflow at 390px. No real invitations or membership changes were made by these checks.
+
+## Balances and settlements
+
+- Added lazy `/balances` and `/settlements` routes using the existing Divvy theme, PageHeader, Card, Avatar, Badge, Alert, Empty, Skeleton, Field, Input, Button and Dialog components.
+- Balances shows group expense totals, your remaining payable/receivable balance, searchable member balances and separate purchase/share/repayment amounts. The server owns all balance calculations and repayment suggestions.
+- Settlements shows suggested sender/recipient pairs and allows only the authenticated sender to record a full or partial repayment already sent outside Divvy. Amounts respect native currency precision; payment time uses local input converted to ISO and rejects future dates. Review and final confirmation both refresh the outstanding suggestion before a new submission.
+- Payment history uses server pagination and populated participant/recorder names, with former-member fallbacks. Queries have visible loading, empty, error and retry states; balance/suggestion queries refresh every 30 seconds and on focus. Saves invalidate balances, settlements and dashboard data, including failure paths.
+- Interrupted saves retain an immutable payload/request ID in this browser tab’s session storage. Reload recovery replays that exact request without a new balance preflight, allowing the backend to return an already saved payment even when its suggestion disappeared. A pending save blocks another record in the same group/account. Confirmed success and logout/account changes clear the reference. No credentials are stored with this payload.
+- Fixed the protected route guard to wait for the account to enter Redux before rendering account-dependent pages, preventing a direct Settlements reload from incorrectly redirecting to Groups.
+
+Backend readiness: existing balances, suggested settlements, recording and paginated history endpoints support this module. The backend settlement suite passes all nine tests, including sender-only recording, partial balances, overpayment rejection, identical-request replay and concurrent-save protection. No backend edits were required. The hosted history endpoint returned the expected unauthenticated 401.
+
+Validation: production build, full lint and all 28 frontend regression tests pass. Isolated desktop/mobile browser checks cover searchable balances, history pagination/former members, sender-only actions, partial repayments, validation, current-balance preflight, 409 recovery, lost-response save/reload/identical retry without duplication, loading-account routing, query errors/retry, zero-/three-decimal currencies, pending-save dismissal protection and session cleanup. No real payments or authenticated database writes were made during these checks.
+
+Backend limits retained: history has no edit/delete endpoint. Ordinary inactive memberships are excluded from current balances; no suggestions therefore does not promise that every historical member is settled. Divvy records external payments and does not transfer money. Recovery references survive reload in the same browser tab; closing the tab or signing out clears them, so check history before starting a new record after either action.
+
 ## Next increments
 
-1. Members/invitations: owner invitation management, recipient consent and member removal UI.
-2. Balances/settlements: currency-aware balances, suggested transfers, repayment and history.
-3. Dashboard: spending periods, category summaries and navigation into completed modules.
-4. Group settings/activity: edit settings, activity history, soft deletion and restoration.
-5. Account: registration, password reset and profile settings.
+1. Dashboard: spending periods, category summaries and navigation into completed modules.
+2. Group settings/activity: edit settings, activity history, soft deletion and restoration.
+3. Account: registration, password reset and profile settings.
 
-Existing sidebar destinations for unfinished modules remain pending. Deliver each next increment separately for review.
+Deliver each next increment separately for review.

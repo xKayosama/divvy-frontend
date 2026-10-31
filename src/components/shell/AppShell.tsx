@@ -15,7 +15,9 @@ const AppShell = () => {
           <Header />
 
           <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6">
-            <Outlet />
+            <div className="mx-auto w-full max-w-5xl">
+              <Outlet />
+            </div>
           </main>
         </div>
       </SidebarProvider>

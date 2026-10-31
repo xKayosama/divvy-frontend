@@ -8,3 +8,6 @@ export const personName = (user: UserSummary | null | undefined) =>
   user ? `${user.firstName} ${user.lastName}`.trim() : 'Former member';
 export const userId = (user: string | UserSummary | null) =>
   typeof user === 'string' ? user : (user?._id ?? '');
+
+export const accountId = (account: { id?: string; _id?: string } | null) =>
+  account?._id || account?.id || '';

@@ -11,6 +11,16 @@ const ExpensesPage = lazy(
   () => import('@/features/expenses/pages/ExpensesPage'),
 );
 const BillsPage = lazy(() => import('@/features/bills/pages/BillsPage'));
+const MembersPage = lazy(() => import('@/features/members/pages/MembersPage'));
+const InvitationsPage = lazy(
+  () => import('@/features/members/pages/InvitationsPage'),
+);
+const BalancesPage = lazy(
+  () => import('@/features/balances/pages/BalancesPage'),
+);
+const SettlementsPage = lazy(
+  () => import('@/features/settlements/pages/SettlementsPage'),
+);
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -34,6 +44,10 @@ export default function AppRouter() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/expenses" element={<ExpensesPage />} />
               <Route path="/bills" element={<BillsPage />} />
+              <Route path="/members" element={<MembersPage />} />
+              <Route path="/invitations" element={<InvitationsPage />} />
+              <Route path="/balances" element={<BalancesPage />} />
+              <Route path="/settlements" element={<SettlementsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/groups" replace />} />
