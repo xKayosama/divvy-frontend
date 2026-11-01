@@ -1,3 +1,4 @@
+import ReceiptScanProgress from './ReceiptScanProgress';
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Upload, ScanLine, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { apiMessage } from '@/services/api-error';
+import { prepareReceiptImage, receiptScanError } from '../lib/receipt-image';
 import { useScanReceiptMutation } from '../receiptApi';
 import { receiptFileError, receiptDraft } from '../lib/receipt-draft';
 import type { ScannedReceipt, ReceiptExpenseDraft } from '../receipt-types';
@@ -31,59 +32,75 @@ export default function ReceiptScanDialog({
     [error, setError] = useState(''),
     [result, setResult] = useState<ScannedReceipt | null>(null),
     [reviewed, setReviewed] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const preparation = useRef<AbortController | null>(null);
   const [scan, state] = useScanReceiptMutation();
   const cameraInput = useRef<HTMLInputElement>(null);
   const uploadInput = useRef<HTMLInputElement>(null);
-  function selectFile(event: React.ChangeEvent<HTMLInputElement>) {
+  function selectFile(
+    event: React.ChangeEvent<HTMLInputElement>,
+    autoScan = false,
+  ) {
     const next = event.currentTarget.files?.[0];
     if (!next) return;
     setFile(next);
     setResult(null);
     setReviewed(false);
-    setError(receiptFileError(next));
+    const invalid = receiptFileError(next);
+    setError(invalid);
     event.currentTarget.value = '';
+    if (autoScan && !invalid) void startScan(next);
   }
+  const busy = preparing || state.isLoading;
   const request = useRef<{ abort: () => void } | null>(null),
     cancelled = useRef(false);
   useEffect(
     () => () => {
       cancelled.current = true;
+      preparation.current?.abort();
       request.current?.abort();
     },
     [],
   );
   function close() {
     cancelled.current = true;
+    preparation.current?.abort();
     request.current?.abort();
     onClose();
   }
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!file || request.current) return;
-    const invalid = receiptFileError(file);
+  async function startScan(selectedFile: File | null) {
+    if (!selectedFile || request.current || preparation.current) return;
+    const invalid = receiptFileError(selectedFile);
     setError(invalid);
     if (invalid) return;
     setResult(null);
     setReviewed(false);
     cancelled.current = false;
-    const pending = scan({ groupId, file });
-    request.current = pending;
+    const controller = new AbortController();
+    preparation.current = controller;
+    setPreparing(true);
     try {
+      const prepared = await prepareReceiptImage(
+        selectedFile,
+        controller.signal,
+      );
+      if (cancelled.current) return;
+      const invalidPrepared = receiptFileError(prepared);
+      if (invalidPrepared) throw new Error(invalidPrepared);
+      setPreparing(false);
+      const pending = scan({ groupId, file: prepared });
+      request.current = pending;
       const response = await pending.unwrap();
       if (cancelled.current) return;
       if (response.data.groupId !== groupId || !response.data.receipt.isReceipt)
         throw new Error('Unexpected receipt response. Please scan again.');
       setResult(response.data.receipt);
     } catch (caught) {
-      if (!cancelled.current)
-        setError(
-          apiMessage(
-            caught,
-            'Could not scan this receipt. Try a clearer file or enter the expense manually.',
-          ),
-        );
+      if (!cancelled.current) setError(receiptScanError(caught));
     } finally {
       request.current = null;
+      preparation.current = null;
+      if (!cancelled.current) setPreparing(false);
     }
   }
   function review(itemized: boolean) {
@@ -120,9 +137,12 @@ export default function ReceiptScanDialog({
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">
           <form
-            onSubmit={submit}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void startScan(file);
+            }}
             className="flex flex-col gap-4"
-            aria-busy={state.isLoading}
+            aria-busy={busy}
           >
             <Field>
               <FieldLabel>Receipt</FieldLabel>
@@ -130,7 +150,7 @@ export default function ReceiptScanDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={state.isLoading}
+                  disabled={busy}
                   onClick={() => cameraInput.current?.click()}
                   aria-describedby="receipt-camera-help"
                 >
@@ -140,7 +160,7 @@ export default function ReceiptScanDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={state.isLoading}
+                  disabled={busy}
                   onClick={() => uploadInput.current?.click()}
                   aria-describedby="receipt-file-help"
                 >
@@ -157,8 +177,8 @@ export default function ReceiptScanDialog({
                 className="hidden"
                 tabIndex={-1}
                 aria-label="Take a receipt photo"
-                disabled={state.isLoading}
-                onChange={selectFile}
+                disabled={busy}
+                onChange={(event) => selectFile(event, true)}
               />
               <Input
                 ref={uploadInput}
@@ -168,11 +188,11 @@ export default function ReceiptScanDialog({
                 className="hidden"
                 tabIndex={-1}
                 aria-label="Upload receipt file"
-                disabled={state.isLoading}
-                onChange={selectFile}
+                disabled={busy}
+                onChange={(event) => selectFile(event)}
               />
               <FieldDescription id="receipt-camera-help">
-                Use your phone’s rear camera where supported, or upload an
+                Take a photo to start scanning automatically, or upload an
                 existing receipt.
               </FieldDescription>
               {file && (
@@ -189,9 +209,9 @@ export default function ReceiptScanDialog({
             <div>
               <Button
                 type="submit"
-                disabled={!file || !!receiptFileError(file) || state.isLoading}
+                disabled={!file || !!receiptFileError(file) || busy}
               >
-                {state.isLoading ? (
+                {busy ? (
                   <LoaderCircle
                     data-icon="inline-start"
                     className="animate-spin"
@@ -199,19 +219,16 @@ export default function ReceiptScanDialog({
                 ) : (
                   <ScanLine data-icon="inline-start" />
                 )}
-                {state.isLoading
-                  ? 'Scanning…'
-                  : result
-                    ? 'Scan again'
-                    : 'Scan receipt'}
+                {preparing
+                  ? 'Preparing photo…'
+                  : state.isLoading
+                    ? 'Scanning…'
+                    : result
+                      ? 'Scan again'
+                      : 'Scan receipt'}
               </Button>
             </div>
-            {state.isLoading && (
-              <p role="status" className="text-sm text-muted-foreground">
-                Reading your receipt. This can take up to a minute. Cancel to
-                stop the scan.
-              </p>
-            )}
+            {busy && <ReceiptScanProgress preparing={preparing} />}
           </form>
           {error && (
             <Alert variant="destructive" className="mt-4">
@@ -328,7 +345,7 @@ export default function ReceiptScanDialog({
         </div>
         <div className="flex shrink-0 justify-end border-t px-6 py-4">
           <Button variant="outline" onClick={close}>
-            {state.isLoading ? 'Cancel scan' : 'Cancel'}
+            {busy ? 'Cancel scan' : 'Cancel'}
           </Button>
         </div>
       </DialogContent>

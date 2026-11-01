@@ -223,3 +223,25 @@ Validation: production build, full lint and all 45 frontend tests pass. All nine
 Checked the backend upload contract first: camera-produced JPEG/PNG/WebP files already use the existing multipart scan endpoint and 10 MB limit; no backend change is required. Added separate Take photo and Upload receipt buttons. The photo input requests `capture="environment"` and accepts supported image formats; the ordinary upload input also accepts PDFs and has no camera capture hint. Both share validation and the existing review flow, show the chosen filename and allow selecting the same file again. Cancelling a picker preserves the current selection.
 
 Validation: build, lint and all 45 frontend tests pass. Browser DOM checks verified distinct camera/upload inputs, the rear-camera hint and PDF separation; 320px/390px layouts have no horizontal overflow. Physical-device camera capture remains unverified and depends on browser support; desktop browsers may open a normal file picker.
+
+## Camera-photo OCR timeout mitigation
+
+Investigated the reported Android scan timeout. The backend enforces a 60-second OCR deadline, while camera images were previously uploaded at their full pixel dimensions. Large-image OCR workload is a plausible cause; the exact failing phone image was not available to reproduce.
+
+Added cancellable browser photo preparation before upload: images are bounded to a 2400px edge and four megapixels, preserve aspect/orientation, and are encoded as high-quality JPEG over white when resized. Smaller images and PDFs are unchanged. Controls remain locked during preparation and scanning. Preparation failures, server OCR deadlines and client network timeouts now have distinct actionable feedback. Existing upload limits and backend OCR safeguards are retained.
+
+Validation: build/lint and 49 frontend tests pass. A browser harness exercised actual image decoding/canvas encoding and sent the optimized synthetic photo through the real local OCR service: 4000×3000 became 2309×1732, retained a readable PHP 224 total and completed preparation plus OCR in approximately 0.6 seconds. The built phone preview was refreshed; the original Android photo still needs a retry to confirm resolution on the user's device.
+
+## Automatic camera scanning and scan progress
+
+A valid file returned by Take photo now starts image preparation and OCR automatically, using the captured File directly rather than waiting for React selection state. Upload receipt retains the manual scan action. Empty/cancelled selections and invalid files do not start scans; synchronous in-flight guards continue to prevent duplicate requests.
+
+Added a mint scan-progress card with a sweeping receipt scan line, skeleton text and spinner. Accessible status text distinguishes Preparing your photo from Scanning your receipt, and animations respect reduced-motion preferences. Cancellation remains available during both stages; expenses still require review and an explicit save.
+
+Validation: build, lint and all 49 existing tests pass. An isolated browser preview verified both progress messages, active scan-line/spinner animations and 320px layout without overflow. Physical Android camera capture/automatic handoff still requires the user's device retry.
+
+## Automatic scan mobile browser verification
+
+Verified the actual Take photo control and camera-input change handler using a synthetic file returned through the browser file chooser. At 390×844, file selection immediately displayed Preparing your photo and then Scanning your receipt, without clicking Scan receipt. The scan-line, skeleton and spinner animations were active, source/submit controls were disabled during work, and the successful response opened receipt review with acknowledgment still required. Fixture logs confirmed exactly one OCR request and no expense writes.
+
+Repeated at a fresh 320×740 viewport: the busy dialog stayed within the screen (680.8px height), had no horizontal overflow, and Cancel scan aborted its backend request. A separate Upload receipt selection stayed idle with the manual Scan receipt button enabled and did not increment the OCR request count. Total fixture results: two camera requests, one cancellation and zero saved expenses. No code changes were needed. The physical Android camera UI/hardware was not exercised; tests simulated the camera-returned file through the real file input. Native picker tooling was exceptionally slow, but both flows completed.
