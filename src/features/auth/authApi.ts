@@ -2,6 +2,9 @@ import { api } from '@/services/api';
 
 import type {
   AuthResponse,
+  RegisterResponse,
+  AuthMessageResponse,
+  ResetPasswordRequest,
   RegisterRequest,
   LoginRequest,
   MeResponse,
@@ -14,7 +17,7 @@ export const authApi = api.injectEndpoints({
     logoutSession: builder.mutation<{ success: boolean }, void>({
       query: () => ({ url: '/auth/logout', method: 'POST' }),
     }),
-    register: builder.mutation<AuthResponse, RegisterRequest>({
+    register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (body) => ({
         url: '/auth/register',
         method: 'POST',
@@ -22,6 +25,15 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
+    requestPasswordReset: builder.mutation<
+      AuthMessageResponse,
+      { email: string }
+    >({
+      query: (body) => ({ url: '/auth/forgot-password', method: 'POST', body }),
+    }),
+    resetPassword: builder.mutation<AuthMessageResponse, ResetPasswordRequest>({
+      query: (body) => ({ url: '/auth/reset-password', method: 'POST', body }),
+    }),
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
         url: '/auth/login',
@@ -59,6 +71,8 @@ export const authApi = api.injectEndpoints({
 export const {
   useLogoutSessionMutation,
   useRegisterMutation,
+  useRequestPasswordResetMutation,
+  useResetPasswordMutation,
   useLoginMutation,
   useGetMeQuery,
   useUpdateProfileMutation,

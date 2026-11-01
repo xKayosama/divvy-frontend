@@ -52,3 +52,20 @@ export interface UpdateProfileResponse {
     };
   };
 }
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: { id: string; firstName: string; lastName: string; email: string };
+  };
+}
+export interface AuthMessageResponse {
+  success: boolean;
+  message: string;
+}
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  password: string;
+}

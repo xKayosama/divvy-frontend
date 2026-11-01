@@ -1,3 +1,4 @@
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 import AccountMenu from '@/features/auth/components/AccountMenu';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -15,6 +16,7 @@ const Header = () => {
         </div>
       </div>
 
+      <NotificationBell />
       <AccountMenu />
     </header>
   );

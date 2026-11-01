@@ -1,3 +1,4 @@
+import type { ReceiptExpenseDraft } from '../receipt-types';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { LoaderCircle, Plus, Trash2 } from 'lucide-react';
@@ -40,6 +41,7 @@ import { calculateSplit } from '@/lib/finance/split';
 
 interface Props {
   expense?: Expense;
+  draft?: ReceiptExpenseDraft;
   groupId: string;
   currency: string;
   onClose: () => void;
@@ -110,6 +112,7 @@ export default function ExpenseFormDialog(props: Props) {
 
 function ExpenseForm({
   expense,
+  draft,
   groupId,
   currency,
   members,
@@ -121,8 +124,12 @@ function ExpenseForm({
   onBusy: (busy: boolean) => void;
 }) {
   const currentUser = useAppSelector((state) => state.auth.user);
-  const [description, setDescription] = useState(expense?.description ?? '');
-  const [amount, setAmount] = useState(expense ? String(expense.amount) : '');
+  const [description, setDescription] = useState(
+    expense?.description ?? draft?.description ?? '',
+  );
+  const [amount, setAmount] = useState(
+    expense ? String(expense.amount) : (draft?.amount ?? ''),
+  );
   const [category, setCategory] = useState<ExpenseCategory>(
     expense?.category ?? 'FOOD',
   );
@@ -132,10 +139,12 @@ function ExpenseForm({
       members[0]?._id ??
       '',
   );
-  const [date, setDate] = useState(expense?.date.slice(0, 10) ?? todayDate());
+  const [date, setDate] = useState(
+    expense?.date.slice(0, 10) ?? draft?.date ?? todayDate(),
+  );
   const [notes, setNotes] = useState(expense?.notes ?? '');
   const [splitType, setSplitType] = useState<ExpenseSplitType>(
-    expense?.splitType ?? 'EQUAL',
+    expense?.splitType ?? draft?.splitType ?? 'EQUAL',
   );
   const [selected, setSelected] = useState(
     expense?.participants.map((p) => participantId(p.userId)) ??
@@ -161,13 +170,22 @@ function ExpenseForm({
       key: crypto.randomUUID(),
       amount: String(item.amount),
       quantity: String(item.quantity),
-    })) ?? [newItem()],
+    })) ??
+      draft?.items?.map((item) => ({
+        ...item,
+        key: crypto.randomUUID(),
+        memberIds: [],
+      })) ?? [newItem()],
   );
   const [tax, setTax] = useState(
-    expense?.adjustments?.tax ? String(expense.adjustments.tax.amount) : '',
+    expense?.adjustments?.tax
+      ? String(expense.adjustments.tax.amount)
+      : (draft?.tax ?? ''),
   );
   const [tip, setTip] = useState(
-    expense?.adjustments?.tip ? String(expense.adjustments.tip.amount) : '',
+    expense?.adjustments?.tip
+      ? String(expense.adjustments.tip.amount)
+      : (draft?.tip ?? ''),
   );
   const [taxAllocation, setTaxAllocation] = useState<'EQUAL' | 'PROPORTIONAL'>(
     expense?.adjustments?.tax?.allocation ?? 'PROPORTIONAL',
@@ -315,6 +333,15 @@ function ExpenseForm({
       >
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <fieldset disabled={saving} className="min-w-0 space-y-6 p-6">
+            {draft && (
+              <p
+                role="status"
+                className="rounded-xl bg-secondary p-3 text-sm text-secondary-foreground"
+              >
+                Review your receipt draft, payer and split before saving. No
+                expense has been created yet.
+              </p>
+            )}
             {!members.length && (
               <p
                 role="alert"

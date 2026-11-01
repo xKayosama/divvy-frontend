@@ -1,15 +1,18 @@
+import ReceiptScanDialog from '../components/ReceiptScanDialog';
+import type { ReceiptExpenseDraft } from '../receipt-types';
+import { PagePagination } from '@/components/ui/page-pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { expenseLinkFilters } from '../lib/expense-link-filters';
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Receipt,
+  ScanLine,
   Repeat2,
   Search,
   Wallet,
@@ -61,9 +64,17 @@ const initialFilters: Filters = {
 };
 function GroupExpenses({ group }: { group: Group }) {
   const userId = useAppSelector((state) => state.auth.user?._id);
-  const [filters, setFilters] = useState(initialFilters);
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters] = useState(() => ({
+    ...initialFilters,
+    ...expenseLinkFilters(searchParams, expenseCategories),
+  }));
   const [searchDraft, setSearchDraft] = useState('');
   const [form, setForm] = useState<Expense | 'new' | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [receiptDraft, setReceiptDraft] = useState<
+    ReceiptExpenseDraft | undefined
+  >();
   const [detailId, setDetailId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Expense | null>(null);
   const [notice, setNotice] = useState('');
@@ -126,6 +137,7 @@ function GroupExpenses({ group }: { group: Group }) {
     setFilters(initialFilters);
   }
   function openForm(expense: Expense | 'new') {
+    setReceiptDraft(undefined);
     setDetailId(null);
     setNotice('');
     setForm(expense);
@@ -137,10 +149,20 @@ function GroupExpenses({ group }: { group: Group }) {
         title="Expenses"
         description="Every shared cost. Everyone’s fair share."
         action={
-          <Button className="h-11 px-5" onClick={() => openForm('new')}>
-            <Plus data-icon="inline-start" />
-            Add expense
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="h-11"
+              onClick={() => setScanOpen(true)}
+            >
+              <ScanLine data-icon="inline-start" />
+              Scan receipt
+            </Button>
+            <Button className="h-11 px-5" onClick={() => openForm('new')}>
+              <Plus data-icon="inline-start" />
+              Add expense
+            </Button>
+          </div>
         }
       />
       {notice && (
@@ -449,44 +471,43 @@ function GroupExpenses({ group }: { group: Group }) {
               <p className="text-xs text-muted-foreground">
                 Page {filters.page} of {pages} · {total} expenses
               </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  disabled={isFetching || filters.page <= 1}
-                  onClick={() =>
-                    setFilters((current) => ({
-                      ...current,
-                      page: current.page - 1,
-                    }))
-                  }
-                >
-                  <ChevronLeft className="size-4" />
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  disabled={isFetching || !data.pagination.hasNextPage}
-                  onClick={() =>
-                    setFilters((current) => ({
-                      ...current,
-                      page: current.page + 1,
-                    }))
-                  }
-                >
-                  Next
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
+              <PagePagination
+                aria-label="Expenses pages"
+                page={filters.page}
+                totalPages={pages}
+                disabled={isFetching}
+                hasNextPage={data.pagination.hasNextPage}
+                onPageChange={(page) =>
+                  setFilters((current) => ({ ...current, page }))
+                }
+              />
             </div>
           )}
         </CardContent>
       </Card>
+      {scanOpen && (
+        <ReceiptScanDialog
+          groupId={group.id}
+          currency={group.currency}
+          onClose={() => setScanOpen(false)}
+          onReview={(draft) => {
+            setReceiptDraft(draft);
+            setScanOpen(false);
+            setForm('new');
+            setNotice('');
+          }}
+        />
+      )}
       {form && (
         <ExpenseFormDialog
           expense={form === 'new' ? undefined : form}
+          draft={form === 'new' ? receiptDraft : undefined}
           groupId={group.id}
           currency={group.currency}
-          onClose={() => setForm(null)}
+          onClose={() => {
+            setForm(null);
+            setReceiptDraft(undefined);
+          }}
           onSaved={(expense) => {
             setNotice(
               `“${expense.description}” ${form === 'new' ? 'added' : 'updated'}. Balances will reflect this change.`,

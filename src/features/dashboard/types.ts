@@ -1,3 +1,30 @@
+export type SpendingPeriod = 'all_time' | 'this_month' | 'last_month';
+export interface DashboardPeriod {
+  value: SpendingPeriod;
+  timeZone: 'UTC';
+  startDate: string | null;
+  endDate: string | null;
+}
+export interface SpendingCategory {
+  category: string;
+  amount: number;
+  count: number;
+  percentage: number;
+}
+export interface SpendingComparison {
+  timeZone: 'UTC';
+  basis: 'calendar_month';
+  current: {
+    startDate: string;
+    endDate: string;
+    amount: number;
+    isInProgress: boolean;
+  };
+  previous: { startDate: string; endDate: string; amount: number };
+  difference: number;
+  percentageChange: number | null;
+  direction: 'increase' | 'decrease' | 'unchanged';
+}
 export interface DashboardBalance {
   user: {
     _id: string;
@@ -56,6 +83,9 @@ export interface DashboardResponse {
   success: boolean;
   message: string;
   data: {
+    period: DashboardPeriod;
+    spendingByCategory: SpendingCategory[];
+    spendingComparison: SpendingComparison | null;
     summary: {
       totalExpenses: number;
       totalPaid: number;

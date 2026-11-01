@@ -1,10 +1,12 @@
 import {
   ArrowLeftRight,
+  Bell,
   FileText,
   LayoutDashboard,
   Mail,
   Receipt,
   Scale,
+  Settings,
   Users,
 } from 'lucide-react';
 
@@ -29,6 +31,7 @@ export const navigation = [
     path: '/members',
     icon: Users,
   },
+  { label: 'Notifications', path: '/notifications', icon: Bell },
   { label: 'Invitations', path: '/invitations', icon: Mail },
   {
     label: 'Balances',
@@ -40,4 +43,5 @@ export const navigation = [
     path: '/settlements',
     icon: ArrowLeftRight,
   },
+  { label: 'Group settings', path: '/group-settings', icon: Settings },
 ];

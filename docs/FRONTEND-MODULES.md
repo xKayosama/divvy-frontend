@@ -30,7 +30,7 @@ Implemented:
 
 Validation: `npm run build`, `npm run lint`, `npm test` (8 regression tests), and 1,200 local comparisons against the backend split calculators across JPY/PHP/KWD. Browser checks use fixture API responses and cover pagination/search/filter/sort, all split payloads, paid-bill restrictions, recurring creation/pause/resume/edit, save/delete failures and retries, group/currency switching and mobile layout. Live MongoDB writes and timed recurring worker execution were not exercised. Currency precision is copied from the backend's `currency-precision.json`; synchronize it when supported precision changes.
 
-Receipt OCR import is a separate future enhancement; manual itemized entry is available here.
+Receipt OCR import was added in the later Receipt scanning increment below; manual itemized entry remains available.
 
 ## Increment 3: bills
 
@@ -131,8 +131,95 @@ Backend limits retained: history has no edit/delete endpoint. Ordinary inactive 
 
 ## Next increments
 
-1. Dashboard: spending periods, category summaries and navigation into completed modules.
-2. Group settings/activity: edit settings, activity history, soft deletion and restoration.
-3. Account: registration, password reset and profile settings.
+1. Account deletion settings and complete group-icon presentation; inspect backend readiness before implementation. Email editing is excluded by user preference.
 
 Deliver each next increment separately for review.
+
+## Group settings and activity
+
+- Added `/group-settings` with server-verified owner controls for name, currency and supported icon settings. Members can view settings and activity. Currency changes are disabled when the backend reports existing financial activity; backend validation errors preserve drafts.
+- Added paginated activity history for expense additions/edits/deletions, bill payments and group updates, with actor/date labels and loading/error/retry states.
+- Added reversible deletion with group-name confirmation, pending dismissal protection and selection cleanup after success. No permanent deletion control is exposed.
+- Groups now includes a lazy-loaded Deleted groups section with confirmed restoration. Copy explains preserved records/memberships, paused expense schedules and skipped missed bill periods. Restoring does not automatically select the group.
+- Mutations invalidate related group, membership and financial queries. Group-switch/navigation during pending settings operations cannot restore an old selection.
+
+Validation: production build, full lint and 28 existing regression tests pass. Local Chrome checks against the running backend verified settings/activity rendering, currency locking and the deletion confirmation's disabled action and cancellation. No real settings, groups or memberships were modified. Save/delete/restore mutations, failure recovery, multi-page activity and mobile layouts still need end-to-end verification.
+
+## Shared shadcn pagination
+
+Expenses, Bills, settlement history and group activity now compose the existing local shadcn Pagination primitives through `components/ui/page-pagination.tsx`. Numbered pages, current-page indication, ellipses and accessible previous/next controls retain each feature's server pagination and filter state. Controls block navigation during loading and at the relevant page boundaries; narrow layouts wrap controls.
+
+Validation: production build and full lint pass. Local Chrome confirmed group activity renders numbered pagination and disables previous/next on its single page. Multi-page and mobile interaction checks remain pending.
+
+## Pagination browser verification
+
+Tested the running frontend against an isolated, read-only fixture server exposing 12 pages for Expenses, Bills, settlement history and group activity. Desktop (1440×900), mobile (390×844) and narrow mobile (320×740) checks passed:
+
+- Next, Previous, numbered jumps and first/last boundaries display the requested page's data and current-page marker. Requests stayed within pages 1–12.
+- Middle activity pages show ellipses on both sides; controls wrap at 320px without horizontal document overflow. All four pages had document widths equal to their mobile viewports.
+- Loading blocks pagination actions (Expenses/Bills hide their controls while fetching; history/activity disable them).
+- Expense search remains in page-two requests. Bills retains separate Unpaid and History page states. Enter activates numbered navigation.
+
+No application changes were needed. Fixtures used synthetic records, intercepted API requests locally and rejected mutations; no real records or account state were modified. This validates frontend pagination behavior, not production backend pagination correctness.
+
+## Group settings lifecycle verification
+
+Fixture-backed browser checks passed at desktop 1440×900 and mobile 390×844 and 320×740:
+
+- Save trims names, persists name/currency/icon across reload and updates selected-group display. Blank names cannot submit; existing financial activity locks currency. Pending saves disable editing and deletion.
+- Deletion requires the exact current group name; cancellation sends no mutation. Pending delete/restore dialogs prevent Escape dismissal and disable controls. Successful deletion clears the selection, redirects to Groups and survives reload.
+- Deleted groups appear in the owner list. Restoration refreshes active/deleted lists, closes the confirmation and keeps the user on Groups without selecting the restored group.
+- Simulated 503 responses for save/delete/restore preserve drafts/confirmation and support successful retries. Mutation logs verified trimmed update payloads and dedicated soft-delete/restore POST requests.
+- Server-reported members see disabled settings and no save/delete actions even when the stored selection claims OWNER.
+- Fixed a Groups header overflow found at 320px by allowing the branding/action row to wrap. Rechecked after reload: document width equals viewport width; delete/restore dialogs fit within the viewport.
+
+Validation: production build, full lint, all 28 frontend tests and all 35 selected backend activity/currency/group-lifecycle regression tests pass. Backend tests mock storage; browser checks use an isolated in-memory fixture API. Real database writes, recurring workers and production recovery were not exercised.
+
+## Dashboard spending periods and categories
+
+- Dashboard now requests server-owned analytics for All time (default), This month and Last month. Query caching includes group and period; switching groups resets the period and never reuses another group's dashboard data. A labeled shared FormSelect stays available while loading or retrying errors.
+- Spending totals, recent expenses and category rows follow the backend's UTC calendar period. Current balances, bill summaries and upcoming bills keep their existing scope, explained in the UI. Empty months keep current balances/bills visible.
+- Added a category summary with server amounts, expense counts, percentages and proportional mint/green bars. Category rows and Recent Expenses' View all link open Expenses with the exact server date bounds; Expenses validates linked categories and real calendar dates before querying.
+- Monthly comparisons use server-provided differences/percentages, describe the previous calendar month, flag the current month as in progress and explain the missing percentage when the comparison baseline is zero. No financial aggregation is duplicated in the frontend.
+- Dashboard now uses shared native currency precision and UTC date formatting. Small-screen bill summaries stack to preserve readable amounts.
+
+Validation: production build, full lint and all 31 frontend regression tests pass. All 34 backend dashboard-period/category/comparison tests pass. Isolated browser fixtures verified all three periods, category/date drilldown requests, current balance/bill scope, zero-spend months, zero-baseline comparisons, loading without stale-period results, failed-query retry, group/currency switching, PHP/JPY/KWD precision, and desktop/390px/320px layouts without horizontal overflow. No real records were changed; production analytics/database behavior was not exercised.
+
+## Registration and password reset
+
+Backend readiness was checked before implementation: `POST /auth/register`, `/auth/forgot-password` and `/auth/reset-password` already exist with validation, rate limits, code expiry and session invalidation. No backend edits were needed. Corrected the frontend registration response contract: registration returns a user without a token, so success offers an explicit sign-in action.
+
+- Added public `/register`, `/forgot-password` and `/reset-password` routes and login links. All reuse the existing Divvy branding through a shared auth layout and local shadcn/Base UI controls.
+- Registration trims names, normalizes email, validates confirmation and enforces backend-compatible password limits (at least 8 JavaScript characters and at most 72 UTF-8 bytes). Field errors are labeled; duplicate/service errors preserve drafts; pending requests disable controls.
+- Reset requests preserve the generic account-existence response. The code form accepts exactly eight digits, including leading zeros, with password confirmation, 15-minute expiry guidance, a 60-second resend cooldown and a different-email action. Expired/invalid codes, rate limits, unavailable delivery and transient failures have visible feedback and retry paths.
+- Reset success clears code/password state and local token/group/API state, then offers sign-in. Codes and passwords are never put in URLs or persistent storage. Existing-code entry is available without requesting another email.
+- Added the user's requirement to check backend readiness before every new feature to `AGENTS.md`.
+
+Validation: production build and full lint pass, along with 35 frontend tests and 25 backend auth/readiness/reset tests using mocked storage/transports. Isolated browser fixtures verified blank/confirmation validation, trimmed registration payloads, duplicate conflict, service retry, explicit sign-in, generic code requests, code length/leading zeros, invalid/expired recovery, pending locks, resend cooldown/countdown, different-email handling, 429/503 feedback, reset success and existing local-session cleanup. Desktop 1440×900 and mobile 390×844/320×740 layouts fit without horizontal overflow. Required reset email configuration keys are present in the local backend environment; real email delivery, real account creation and actual password changes were not exercised. Hosted delivery configuration remains a deployment concern.
+
+## Notifications inbox
+
+Backend readiness was checked first: the authenticated notification router exposes inbox, unread-count, mark-one-read and mark-all-read endpoints. Inbox pages contain up to 20 entries, scoped to the authenticated account. Current bill digests and pending invitations are discovered during reads, with deduplicated snapshots and no historical backfill. All nine backend inbox regression tests pass; no backend changes were required.
+
+- Added lazy `/notifications`, a sidebar link and an unread bell in the application header and Groups page. Inbox access does not require a selected group. Counts are account-scoped; large badges display 99+ while accessible labels retain the exact number. Count failures do not display a misleading zero.
+- Added shadcn pagination, unread styling, explicit mark-as-read and mark-all-read controls, refresh, loading/empty/error/retry states and readable local timestamps. Successful reads invalidate both inbox and unread-count queries. Failures preserve unread status and allow retries.
+- Opening an invitation marks it read and opens Invitations without accepting anything. Bill links refresh active group memberships before switching to the notification's group and opening the bill/list. Unavailable groups remain in the inbox with an explanation; they are not silently marked read. Digests spanning multiple groups open Groups. Unknown future notification types remain readable without guessed destinations.
+- Queries poll every 60 seconds while focused and refetch on focus. Enabled RTK Query's shared browser listeners so the existing focus/refetch settings work. Account/session checks prevent a pending notification action from navigating or changing group selection after the originating session is gone.
+
+Validation: production build, full lint and all 39 frontend tests pass. All nine backend inbox tests pass. Isolated browser fixtures verified single/all-read count updates, failed-query and failed-mutation recovery, first/last pages and seven-page navigation, keyboard pagination, no-selected-group access, invitation/cross-group bill/multi-group destinations, unavailable membership handling, large unread counts, logout/login cache isolation and desktop/390px/320px layouts without horizontal overflow. Mutation logs confirmed opening an unavailable group sends no mark-read request. Real notifications were not marked read by these tests. Browser push delivery remains outside this feature; the current backend push transport accepts Expo device tokens.
+
+## Receipt scanning
+
+Backend readiness was checked before implementation: authenticated `POST /groups/:id/receipts/scan` accepts a single multipart `receipt` file (JPEG, PNG, WebP or PDF, up to 10 MB), verifies group access and returns transient extraction data for review. Local Tesseract OCR dependencies and bundled English data are installed, and the Docker runtime includes Poppler for PDFs (first three pages only). All nine backend receipt tests pass, including real local OCR, upload/access limits and cancelled-scan cleanup. No backend changes were required.
+
+- Added Scan receipt to Expenses, a cancellable upload/review dialog, file validation, processing feedback and server error/retry messages. Closing the dialog or changing groups aborts an in-flight scan. The frontend does not retain a public attachment URL or persist the file.
+- Review displays extracted merchant/date/currency/totals, item quantities/unit prices/line totals and backend warnings. Explicit acknowledgment is required before transferring data into the existing expense form. Currency mismatches block import; unknown currency requires confirmation against the group currency. No conversion is performed.
+- Users can review a total-only equal-split draft or an itemized draft. Items use extracted line totals, never quantity multiplied again, and start with no member assignments. Missing values stay blank, incompatible currency precision is not rounded into the draft, and the existing expense validation/preview remains authoritative before saving.
+
+Validation: production build, full lint and all 45 frontend tests pass. All nine backend receipt tests pass. An isolated browser fixture performed real OCR on the generated backend receipt image, verified required review, saved a total-only synthetic expense, and verified itemized quantity/line-total/tax import, required member assignments and a single synthetic save. Browser checks also verified unsupported-file rejection before upload, cancellation before submission, 320px/390px dialog fit and the 320px expense-form scrolling. Native file-chooser operations were exceptionally slow; service-error/mismatch/unknown-value/oversize and in-flight cancellation paths are covered by helpers/backend tests or source review rather than a complete browser matrix. PDF end-to-end OCR and real authenticated production scans remain unverified. No real expenses or personal receipts were used.
+
+## Receipt camera capture
+
+Checked the backend upload contract first: camera-produced JPEG/PNG/WebP files already use the existing multipart scan endpoint and 10 MB limit; no backend change is required. Added separate Take photo and Upload receipt buttons. The photo input requests `capture="environment"` and accepts supported image formats; the ordinary upload input also accepts PDFs and has no camera capture hint. Both share validation and the existing review flow, show the chosen filename and allow selecting the same file again. Cancelling a picker preserves the current selection.
+
+Validation: build, lint and all 45 frontend tests pass. Browser DOM checks verified distinct camera/upload inputs, the rear-camera hint and PDF separation; 320px/390px layouts have no horizontal overflow. Physical-device camera capture remains unverified and depends on browser support; desktop browsers may open a normal file picker.

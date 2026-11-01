@@ -1,3 +1,4 @@
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { Brand } from '@/components/brand/Brand';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import { setSelectedGroup } from '@/features/groups/groupSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import LogoutButton from '@/features/auth/components/LogoutButton';
+import DeletedGroups from '../components/DeletedGroups';
 import CreateGroupDialog from '../components/CreateGroupDialog';
 import { useGetGroupsQuery } from '../groupApi';
 
@@ -24,9 +26,10 @@ export default function GroupsPage() {
   return (
     <main className="min-h-svh bg-background bg-brand-screen">
       <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8">
           <Brand />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <NotificationBell />
             <Link
               to="/invitations"
               className={buttonVariants({ variant: 'outline' })}
@@ -146,6 +149,7 @@ export default function GroupsPage() {
             ))}
           </div>
         )}
+        <DeletedGroups />
       </div>
     </main>
   );

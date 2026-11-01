@@ -1,19 +1,11 @@
+import { PagePagination } from '@/components/ui/page-pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { FormSelect } from '@/components/ui/form-select';
 import BillReminders from '../components/BillReminders';
 import { useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Plus,
-  Repeat2,
-  Search,
-  X,
-} from 'lucide-react';
+import { ArrowUpRight, FileText, Plus, Repeat2, Search, X } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -462,34 +454,19 @@ function GroupBills({
                 <p className="text-xs text-muted-foreground">
                   Page {active.page} of {pages} · {total} bills
                 </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    disabled={isFetching || active.page <= 1}
-                    onClick={() =>
-                      setFilters((current) => ({
-                        ...current,
-                        [view]: { ...current[view], page: active.page - 1 },
-                      }))
-                    }
-                  >
-                    <ChevronLeft className="size-4" />
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    disabled={isFetching || !data.pagination.hasNextPage}
-                    onClick={() =>
-                      setFilters((current) => ({
-                        ...current,
-                        [view]: { ...current[view], page: active.page + 1 },
-                      }))
-                    }
-                  >
-                    Next
-                    <ChevronRight className="size-4" />
-                  </Button>
-                </div>
+                <PagePagination
+                  aria-label="Bills pages"
+                  page={active.page}
+                  totalPages={pages}
+                  disabled={isFetching}
+                  hasNextPage={data.pagination.hasNextPage}
+                  onPageChange={(page) =>
+                    setFilters((current) => ({
+                      ...current,
+                      [view]: { ...current[view], page },
+                    }))
+                  }
+                />
               </div>
             )}
           </CardContent>

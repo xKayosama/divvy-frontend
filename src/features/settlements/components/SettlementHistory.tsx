@@ -1,3 +1,4 @@
+import { PagePagination } from '@/components/ui/page-pagination';
 import { useState } from 'react';
 import {
   Card,
@@ -99,22 +100,14 @@ export default function SettlementHistory({
               ? 'Updating history…'
               : `Page ${page} of ${pages}`}
           </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              disabled={page <= 1 || query.isFetching}
-              onClick={() => setPage((current) => current - 1)}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              disabled={page >= pages || query.isFetching || !!query.error}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              Next
-            </Button>
-          </div>
+          <PagePagination
+            aria-label="Settlement history pages"
+            page={page}
+            totalPages={pages}
+            disabled={query.isFetching}
+            hasNextPage={!query.error && page < pages}
+            onPageChange={setPage}
+          />
         </div>
       </CardContent>
     </Card>

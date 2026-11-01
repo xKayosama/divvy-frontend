@@ -1,3 +1,16 @@
+import { useState } from 'react';
+import { FormSelect } from '@/components/ui/form-select';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { buttonVariants } from '@/components/ui/button-variants';
+import { currencyMoney } from '@/lib/finance/money';
+import { formatDate } from '@/lib/date';
+import { apiMessage } from '@/services/api-error';
+import type { Group } from '@/features/groups/types';
+import type { DashboardResponse, SpendingPeriod } from '../types';
+import { spendingPeriods, spendingExpensesLink } from '../lib/spending';
+import SpendingCategories from '../components/SpendingCategories';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Navigate, Link } from 'react-router-dom';
@@ -31,56 +44,96 @@ import { useGetDashboardQuery } from '@/features/dashboard/dashboardApi';
 import { useAppSelector } from '@/app/hooks';
 
 const DashboardPage = () => {
-  const selectedGroup = useAppSelector((state) => state.groups.selectedGroup);
-
-  const groupId = selectedGroup?.id;
-
+  const group = useAppSelector((state) => state.groups.selectedGroup);
+  return group ? (
+    <GroupDashboard key={group.id} group={group} />
+  ) : (
+    <Navigate to="/groups" replace />
+  );
+};
+function GroupDashboard({ group }: { group: Group }) {
+  const [period, setPeriod] = useState<SpendingPeriod>('all_time');
   const {
     currentData: data,
     isFetching,
-    isError,
-  } = useGetDashboardQuery(groupId ?? '', {
-    skip: !groupId,
-  });
-
-  if (!groupId) {
-    return <Navigate to="/groups" replace />;
-  }
-
-  if (isFetching && !data) {
-    return (
-      <div className="flex min-h-64 items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
-      </div>
-    );
-  }
-
-  if (isError || !data?.success) {
-    return (
-      <div className="flex min-h-64 items-center justify-center">
-        <p className="text-sm text-destructive">Failed to load dashboard.</p>
-      </div>
-    );
-  }
-
-  const { summary, balances, bills, recentExpenses, upcomingBills } = data.data;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: selectedGroup?.currency ?? 'PHP',
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
-
-  const formatDate = (date: string) => {
-    return new Intl.DateTimeFormat('en-PH', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(new Date(date));
-  };
-
+    error,
+    refetch,
+  } = useGetDashboardQuery(
+    { groupId: group.id, period },
+    { refetchOnFocus: true, refetchOnMountOrArgChange: true },
+  );
+  return (
+    <div className="flex flex-col gap-6 pb-6">
+      <PageHeader
+        eyebrow={group.name}
+        title="Dashboard"
+        description="Explore shared spending and keep up with your group."
+        action={
+          <Field className="w-full sm:w-48">
+            <FieldLabel htmlFor="spending-period">Spending period</FieldLabel>
+            <FormSelect
+              id="spending-period"
+              value={period}
+              onValueChange={(value) => {
+                if (spendingPeriods.some((option) => option.value === value))
+                  setPeriod(value as SpendingPeriod);
+              }}
+              options={spendingPeriods}
+            />
+          </Field>
+        }
+      />
+      <p className="text-sm text-muted-foreground">
+        Spending totals, categories and recent expenses follow the selected
+        period (UTC). Balances and bills always show the current group position.
+      </p>
+      {error ? (
+        <Alert variant="destructive">
+          <AlertTitle>Could not load dashboard</AlertTitle>
+          <AlertDescription>
+            <p>{apiMessage(error, 'Please try again.')}</p>
+            <Button variant="outline" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : !data ? (
+        <div
+          role="status"
+          aria-label="Loading dashboard"
+          className="grid gap-4 sm:grid-cols-3"
+        >
+          <span className="sr-only">Loading dashboard…</span>
+          {[1, 2, 3].map((value) => (
+            <Skeleton key={value} className="h-32 rounded-2xl" />
+          ))}
+        </div>
+      ) : (
+        <div aria-busy={isFetching}>
+          {isFetching && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              Updating dashboard…
+            </p>
+          )}
+          <DashboardOverview data={data} currency={group.currency} />
+        </div>
+      )}
+    </div>
+  );
+}
+function DashboardOverview({
+  data,
+  currency,
+}: {
+  data: DashboardResponse;
+  currency: string;
+}) {
+  const { summary, balances, bills, recentExpenses, upcomingBills, period } =
+    data.data;
+  const formatCurrency = currencyMoney(currency).format;
+  const periodLabel =
+    spendingPeriods.find((option) => option.value === period.value)?.label ??
+    'Selected period';
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'FOOD':
@@ -117,12 +170,6 @@ const DashboardPage = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
-      <PageHeader
-        eyebrow="Overview"
-        title="Dashboard"
-        description="Here's an overview of your group expenses."
-      />
-
       {/* Summary Cards */}
       <section>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -141,7 +188,7 @@ const DashboardPage = () => {
                 {formatCurrency(summary.totalExpenses)}
               </p>
 
-              <p className="mt-3 text-xs text-white/80">All group expenses</p>
+              <p className="mt-3 text-xs text-white/80">{periodLabel} · UTC</p>
             </CardContent>
           </Card>
 
@@ -161,7 +208,7 @@ const DashboardPage = () => {
               </p>
 
               <p className="mt-3 text-xs text-muted-foreground">
-                Amount paid by members
+                Paid for expenses · {periodLabel.toLowerCase()}
               </p>
             </CardContent>
           </Card>
@@ -182,12 +229,14 @@ const DashboardPage = () => {
               </p>
 
               <p className="mt-3 text-xs text-muted-foreground">
-                Total participant shares
+                Expense shares · {periodLabel.toLowerCase()}
               </p>
             </CardContent>
           </Card>
         </div>
       </section>
+
+      <SpendingCategories data={data.data} currency={currency} />
 
       {/* Balances + Recent Expenses */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -201,7 +250,7 @@ const DashboardPage = () => {
                 </CardTitle>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  See who owes and who is owed.
+                  Current balances, including recorded repayments.
                 </p>
               </div>
 
@@ -293,18 +342,17 @@ const DashboardPage = () => {
                 </CardTitle>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Latest group transactions.
+                  Latest expenses · {periodLabel.toLowerCase()}.
                 </p>
               </div>
 
-              <Button
-                type="button"
-                variant="ghost"
-                className="hidden text-xs font-semibold sm:flex"
+              <Link
+                to={spendingExpensesLink(period)}
+                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
               >
                 View all
-                <ArrowRight className="ml-1 size-3.5" strokeWidth={2} />
-              </Button>
+                <ArrowRight data-icon="inline-end" />
+              </Link>
             </div>
           </CardHeader>
 
@@ -345,8 +393,8 @@ const DashboardPage = () => {
 
                           <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                             <span>
-                              {expense.paidBy.firstName}{' '}
-                              {expense.paidBy.lastName}
+                              {expense.paidBy?.firstName ?? 'Former member'}{' '}
+                              {expense.paidBy?.lastName}
                             </span>
 
                             <span>•</span>
@@ -403,7 +451,7 @@ const DashboardPage = () => {
           </CardHeader>
 
           <CardContent className="p-5">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid gap-3 sm:grid-cols-3">
               {/* Pending */}
               <Link
                 to="/bills?status=PENDING"
@@ -546,6 +594,6 @@ const DashboardPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default DashboardPage;

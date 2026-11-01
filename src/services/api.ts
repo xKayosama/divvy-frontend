@@ -32,6 +32,7 @@ export const api = createApi({
 
   tagTypes: [
     'Auth',
+    'Notification',
     'Group',
     'Member',
     'Invitation',

@@ -6,4 +6,6 @@ Keep the frontend's branding aligned with divvy-mobile: the shared green/mint th
 
 Follow the feature-based structure and ownership documented in docs/ARCHITECTURE.md. Existing household route/storage references are compatibility adapters, not current product terminology; preserve them when needed for existing users.
 
+Before implementing a new feature, inspect the backend's existing routes, contracts, validation and relevant tests to confirm readiness. Reuse supported endpoints and clearly identify any backend gaps or required service configuration.
+
 Use the existing local shadcn/Base UI components for interface controls. For controlled dropdowns, prefer components/ui/form-select.tsx over raw HTML selects; keep Divvy theme tokens and accessible labels. Check existing components before installing or generating replacements.
