@@ -245,3 +245,18 @@ Validation: build, lint and all 49 existing tests pass. An isolated browser prev
 Verified the actual Take photo control and camera-input change handler using a synthetic file returned through the browser file chooser. At 390×844, file selection immediately displayed Preparing your photo and then Scanning your receipt, without clicking Scan receipt. The scan-line, skeleton and spinner animations were active, source/submit controls were disabled during work, and the successful response opened receipt review with acknowledgment still required. Fixture logs confirmed exactly one OCR request and no expense writes.
 
 Repeated at a fresh 320×740 viewport: the busy dialog stayed within the screen (680.8px height), had no horizontal overflow, and Cancel scan aborted its backend request. A separate Upload receipt selection stayed idle with the manual Scan receipt button enabled and did not increment the OCR request count. Total fixture results: two camera requests, one cancellation and zero saved expenses. No code changes were needed. The physical Android camera UI/hardware was not exercised; tests simulated the camera-returned file through the real file input. Native picker tooling was exceptionally slow, but both flows completed.
+
+## Two-account group integration verification — November 3, 2026
+
+Exercised the real frontend and local backend with its configured MongoDB connection, using two separate browser sessions and newly registered test accounts. No API fixtures were used for this journey. The existing frontend LAN API address was unreachable; an isolated frontend on port 5174 targeted the local backend on port 5001 without changing saved environment settings.
+
+- Registered and signed in as FlowOwner Test and FlowMember Test using dedicated `divvy.flow.owner.20261103@example.com` and `divvy.flow.member.20261103@example.com` accounts.
+- Created `TEST Two-account trip 20261103` in PHP, created an invitation, checked its code as the recipient, explicitly accepted, and opened the joined group.
+- Found and fixed cached member data excluding the newly joined recipient from expense participants. Expense and bill-payment forms now refresh the roster on opening and wait for it before initializing selections.
+- Found and fixed the backend auth `id` versus frontend `_id` mismatch. Login and account verification now normalize the user contract, restoring the correct default payer and personal expense shares. Added two regression tests.
+- Recorded `TEST shared dinner`: PHP 1,200 paid by the owner and split equally. Both accounts showed PHP 600 owed by the member to the owner; the owner's expense list showed a PHP 600 personal share.
+- Recorded a PHP 200 partial repayment, verified the PHP 400 remaining suggestion and receiver-only controls, then recorded the remaining PHP 400. Both accounts showed exactly two history entries, no further repayment suggestions, zero member balances and an unchanged PHP 1,200 expense total.
+- Found and fixed manual repayment refresh leaving payment history stale. Refresh now invalidates settlement, balance and dashboard data; history also refreshes on mount/focus and polls every 30 seconds.
+- Verified owner logout, sign-in and group reopening preserve the settled financial state. Balances fit at 390×844 and 320×740 without horizontal overflow.
+
+Validation: production build, full lint, all 51 frontend tests and diff whitespace checks pass. Test accounts and the settled test group remain available for inspection. This pass did not exercise hosted deployment, email delivery, physical camera capture, receipt OCR, bill payment or timed workers; the bill-payment roster change shares the expense fix but was only build/lint checked in this pass. No backend source changes were required.

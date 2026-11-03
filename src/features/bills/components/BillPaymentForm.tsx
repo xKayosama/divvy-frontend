@@ -26,9 +26,12 @@ interface BillPaymentFormProps {
 export default function BillPaymentForm(props: BillPaymentFormProps) {
   const {
     currentData: data,
+    isFetching,
     isError,
     refetch,
-  } = useGetGroupMembersQuery(props.groupId);
+  } = useGetGroupMembersQuery(props.groupId, {
+    refetchOnMountOrArgChange: true,
+  });
   return isError ? (
     <div role="alert" className="space-y-3 p-6">
       <p>We couldn’t load active members.</p>
@@ -36,7 +39,7 @@ export default function BillPaymentForm(props: BillPaymentFormProps) {
         Retry members
       </Button>
     </div>
-  ) : !data ? (
+  ) : !data || (isFetching && !props.busy) ? (
     <p role="status" className="p-6">
       Loading group members…
     </p>

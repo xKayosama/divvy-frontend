@@ -70,7 +70,9 @@ export default function ExpenseFormDialog(props: Props) {
     isFetching,
     isError,
     refetch,
-  } = useGetGroupMembersQuery(props.groupId);
+  } = useGetGroupMembersQuery(props.groupId, {
+    refetchOnMountOrArgChange: true,
+  });
   return (
     <Dialog
       open
@@ -88,7 +90,7 @@ export default function ExpenseFormDialog(props: Props) {
           </DialogHeader>
           <Button onClick={() => refetch()}>Try again</Button>
         </DialogContent>
-      ) : !data ? (
+      ) : !data || (isFetching && !busy) ? (
         <DialogContent>
           <DialogTitle>Loading expense form</DialogTitle>
           <DialogDescription>

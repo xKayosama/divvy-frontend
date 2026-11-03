@@ -1,4 +1,5 @@
 import { api } from '@/services/api';
+import { normalizeAuthUser, type AuthUserResponse } from './lib/auth-user';
 
 import type {
   AuthResponse,
@@ -40,6 +41,12 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      transformResponse: (response: Omit<AuthResponse, 'data'> & {
+        data: { token: string; user: AuthUserResponse };
+      }) => ({
+        ...response,
+        data: { ...response.data, user: normalizeAuthUser(response.data.user) },
+      }),
     }),
 
     updateProfile: builder.mutation<
@@ -63,6 +70,12 @@ export const authApi = api.injectEndpoints({
     }),
     getMe: builder.query<MeResponse, void>({
       query: () => '/auth/me',
+      transformResponse: (response: Omit<MeResponse, 'data'> & {
+        data: { user: AuthUserResponse };
+      }) => ({
+        ...response,
+        data: { ...response.data, user: normalizeAuthUser(response.data.user) },
+      }),
       providesTags: ['Auth'],
     }),
   }),

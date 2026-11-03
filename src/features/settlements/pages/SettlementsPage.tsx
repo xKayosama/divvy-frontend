@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, RefreshCw } from 'lucide-react';
-import { useAppSelector } from '@/app/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { api } from '@/services/api';
 import { PageHeader } from '@/components/shell/PageHeader';
 import {
   Card,
@@ -53,6 +54,7 @@ function SettlementsContent({
   group: Group;
   sender: string;
 }) {
+  const dispatch = useAppDispatch();
   const query = useGetSettlementSuggestionsQuery(group.id, {
     pollingInterval: 30000,
     refetchOnFocus: true,
@@ -135,7 +137,11 @@ function SettlementsContent({
             <Button
               variant="outline"
               disabled={query.isFetching}
-              onClick={() => query.refetch()}
+              onClick={() =>
+                dispatch(
+                  api.util.invalidateTags(['Settlement', 'Balance', 'Dashboard']),
+                )
+              }
             >
               <RefreshCw data-icon="inline-start" />
               Refresh repayments

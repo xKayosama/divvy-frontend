@@ -27,7 +27,11 @@ export default function SettlementHistory({
   const [page, setPage] = useState(1);
   const query = useGetSettlementHistoryQuery(
     { groupId, page, limit: 20 },
-    { refetchOnFocus: true },
+    {
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 30000,
+    },
   );
   const data = query.currentData;
   const pages = Math.max(1, data?.pagination.totalPages ?? 1),
