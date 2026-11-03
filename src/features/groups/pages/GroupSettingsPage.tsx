@@ -1,3 +1,4 @@
+import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -72,7 +73,7 @@ function Settings({ group }: { group: Group }) {
         description="Manage your shared space and review recent activity."
       />
       {query.isLoading ? (
-        <p role="status">Loading settings…</p>
+        <ContentSkeleton label="Loading settings…" layout="form" />
       ) : query.isError ? (
         <div role="alert">
           <p>Could not load group settings.</p>

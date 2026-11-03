@@ -1,3 +1,4 @@
+import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { Brand } from '@/components/brand/Brand';
@@ -89,12 +90,7 @@ export default function GroupsPage() {
           </div>
         </div>
         {isLoading ? (
-          <p
-            role="status"
-            className="rounded-2xl border bg-white p-10 text-center"
-          >
-            Loading your groups…
-          </p>
+          <ContentSkeleton label="Loading your groups…" layout="cards" />
         ) : isError ? (
           <div
             role="alert"

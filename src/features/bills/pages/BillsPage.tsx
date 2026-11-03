@@ -1,3 +1,4 @@
+import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import { PagePagination } from '@/components/ui/page-pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PageHeader } from '@/components/shell/PageHeader';
@@ -116,7 +117,7 @@ function GroupBills({
     setNotice('');
   }
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow={`${group.name} · Stay ahead`}
         title="Upcoming bills"
@@ -345,12 +346,7 @@ function GroupBills({
                 </Button>
               </div>
             ) : !data ? (
-              <p
-                role="status"
-                className="p-10 text-center text-muted-foreground"
-              >
-                Loading bills…
-              </p>
+              <ContentSkeleton label="Loading bills…" layout="list" />
             ) : !bills.length ? (
               <div className="px-5 py-14 text-center">
                 <FileText className="mx-auto mb-4 size-10 text-primary" />

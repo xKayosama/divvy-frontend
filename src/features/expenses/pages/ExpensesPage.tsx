@@ -1,3 +1,4 @@
+import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import ReceiptScanDialog from '../components/ReceiptScanDialog';
 import type { ReceiptExpenseDraft } from '../receipt-types';
 import { PagePagination } from '@/components/ui/page-pagination';
@@ -143,7 +144,7 @@ function GroupExpenses({ group }: { group: Group }) {
     setForm(expense);
   }
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow={`${group.name} · Shared spending`}
         title="Expenses"
@@ -380,9 +381,7 @@ function GroupExpenses({ group }: { group: Group }) {
               </Button>
             </div>
           ) : !data ? (
-            <p role="status" className="p-10 text-center text-muted-foreground">
-              Loading expenses…
-            </p>
+            <ContentSkeleton label="Loading expenses…" layout="list" />
           ) : !expenses.length ? (
             <div className="px-5 py-14 text-center">
               <Receipt className="mx-auto mb-4 size-10 text-primary" />

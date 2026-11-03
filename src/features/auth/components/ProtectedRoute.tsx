@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
+import { PageSkeleton } from '@/components/shell/PageSkeleton';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useGetMeQuery } from '@/features/auth/authApi';
 import { logout, setUser } from '@/features/auth/authSlice';
@@ -34,7 +35,7 @@ const ProtectedRoute = () => {
   }
 
   if (!user && (isLoading || isFetching)) {
-    return null;
+    return <PageSkeleton />;
   }
 
   if (!user && error) {
@@ -48,7 +49,7 @@ const ProtectedRoute = () => {
     );
   }
   // Account-dependent pages must wait for setUser to populate Redux.
-  if (!user) return null;
+  if (!user) return <PageSkeleton />;
 
   return <Outlet />;
 };

@@ -121,7 +121,7 @@ export default function InvitationsPage() {
     );
   }
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow="Your shared spaces"
         title="Invitations"

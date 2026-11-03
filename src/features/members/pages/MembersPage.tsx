@@ -65,7 +65,7 @@ function MembersContent({ group }: { group: Group }) {
         .includes(search.trim().toLowerCase()),
   );
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow={`${group.name} · People sharing costs`}
         title="Members"

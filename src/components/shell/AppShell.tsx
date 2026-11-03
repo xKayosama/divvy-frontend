@@ -14,8 +14,8 @@ const AppShell = () => {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <Header />
 
-          <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6">
-            <div className="mx-auto w-full max-w-5xl">
+          <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-5 py-3 sm:px-8 sm:py-5 lg:px-12 lg:py-6">
+            <div className="w-full">
               <Outlet />
             </div>
           </main>

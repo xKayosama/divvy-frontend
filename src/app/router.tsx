@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
 import AppShell from '@/components/shell/AppShell';
+import { PageSkeleton } from '@/components/shell/PageSkeleton';
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage'));
 const PasswordResetPage = lazy(
@@ -34,13 +35,7 @@ const GroupSettingsPage = lazy(
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Suspense
-        fallback={
-          <p role="status" className="p-6 text-muted-foreground">
-            Loading…
-          </p>
-        }
-      >
+      <Suspense fallback={<PageSkeleton />}>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />

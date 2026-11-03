@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FormSelect } from '@/components/ui/form-select';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { DashboardSkeleton } from '@/components/shell/PageSkeleton';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { currencyMoney } from '@/lib/finance/money';
 import { formatDate } from '@/lib/date';
@@ -98,16 +98,7 @@ function GroupDashboard({ group }: { group: Group }) {
           </AlertDescription>
         </Alert>
       ) : !data ? (
-        <div
-          role="status"
-          aria-label="Loading dashboard"
-          className="grid gap-4 sm:grid-cols-3"
-        >
-          <span className="sr-only">Loading dashboard…</span>
-          {[1, 2, 3].map((value) => (
-            <Skeleton key={value} className="h-32 rounded-2xl" />
-          ))}
-        </div>
+        <DashboardSkeleton />
       ) : (
         <div aria-busy={isFetching}>
           {isFetching && (
@@ -169,7 +160,7 @@ function DashboardOverview({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       {/* Summary Cards */}
       <section>
         <div className="grid gap-4 sm:grid-cols-3">

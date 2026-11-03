@@ -91,7 +91,7 @@ function SettlementsContent({
     );
   }
   return (
-    <div className="mx-auto flex w-full max-w-330 flex-col gap-6 pb-6">
+    <div className="flex w-full flex-col gap-6 pb-6">
       <PageHeader
         eyebrow={`${group.name} · Settle shared costs`}
         title="Settlements"
