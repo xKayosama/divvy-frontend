@@ -57,6 +57,8 @@ export interface RegisterResponse {
   success: boolean;
   message: string;
   data: {
+    requiresEmailVerification: boolean;
+    emailSent: boolean;
     user: { id: string; firstName: string; lastName: string; email: string };
   };
 }

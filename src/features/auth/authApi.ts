@@ -26,11 +26,21 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
-    verifyEmail: builder.mutation<AuthMessageResponse, { email: string; code: string }>({
+    verifyEmail: builder.mutation<
+      AuthMessageResponse,
+      { email: string; code: string }
+    >({
       query: (body) => ({ url: '/auth/verify-email', method: 'POST', body }),
     }),
-    resendVerification: builder.mutation<AuthMessageResponse, { email: string }>({
-      query: (body) => ({ url: '/auth/resend-verification', method: 'POST', body }),
+    resendVerification: builder.mutation<
+      AuthMessageResponse,
+      { email: string }
+    >({
+      query: (body) => ({
+        url: '/auth/resend-verification',
+        method: 'POST',
+        body,
+      }),
     }),
     requestPasswordReset: builder.mutation<
       AuthMessageResponse,
@@ -47,9 +57,11 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      transformResponse: (response: Omit<AuthResponse, 'data'> & {
-        data: { token: string; user: AuthUserResponse };
-      }) => ({
+      transformResponse: (
+        response: Omit<AuthResponse, 'data'> & {
+          data: { token: string; user: AuthUserResponse };
+        },
+      ) => ({
         ...response,
         data: { ...response.data, user: normalizeAuthUser(response.data.user) },
       }),
@@ -76,9 +88,11 @@ export const authApi = api.injectEndpoints({
     }),
     getMe: builder.query<MeResponse, void>({
       query: () => '/auth/me',
-      transformResponse: (response: Omit<MeResponse, 'data'> & {
-        data: { user: AuthUserResponse };
-      }) => ({
+      transformResponse: (
+        response: Omit<MeResponse, 'data'> & {
+          data: { user: AuthUserResponse };
+        },
+      ) => ({
         ...response,
         data: { ...response.data, user: normalizeAuthUser(response.data.user) },
       }),

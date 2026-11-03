@@ -20,7 +20,9 @@ import AccountCard from '../components/AccountCard';
 import PasswordField from '../components/PasswordField';
 export default function RegisterPage() {
   const location = useLocation();
-  const [verificationEmail, setVerificationEmail] = useState<string>(location.state?.verificationEmail || '');
+  const [verificationEmail, setVerificationEmail] = useState<string>(
+    location.state?.verificationEmail || '',
+  );
   const [notice, setNotice] = useState('');
   const [values, setValues] = useState({
     firstName: '',
@@ -63,11 +65,19 @@ export default function RegisterPage() {
   }
   return (
     <AccountCard
-      title={complete ? 'Your account is ready' : verificationEmail ? 'Verify your email' : 'Create an account'}
+      title={
+        complete
+          ? 'Your account is ready'
+          : verificationEmail
+            ? 'Verify your email'
+            : 'Create an account'
+      }
       description={
         complete
           ? 'Sign in to start sharing expenses with your groups.'
-          : 'For friends, trips and everyone sharing costs.'
+          : verificationEmail
+            ? 'Confirm your email address to finish creating your account.'
+            : 'For friends, trips and everyone sharing costs.'
       }
       footer={
         <Link
@@ -83,7 +93,10 @@ export default function RegisterPage() {
       ) : verificationEmail ? (
         <div className="flex flex-col gap-5">
           {notice && <p role="status">{notice}</p>}
-          <SignupVerification email={verificationEmail} onVerified={() => setComplete(true)} />
+          <SignupVerification
+            email={verificationEmail}
+            onVerified={() => setComplete(true)}
+          />
         </div>
       ) : (
         <form

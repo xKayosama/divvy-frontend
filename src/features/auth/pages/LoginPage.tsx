@@ -63,7 +63,9 @@ const LoginPage = () => {
         };
 
         if (apiError.data?.code === 'EMAIL_NOT_VERIFIED') {
-          navigate('/register', { state: { verificationEmail: email.trim().toLowerCase() } });
+          navigate('/register', {
+            state: { verificationEmail: email.trim().toLowerCase() },
+          });
           return;
         }
         setErrorMessage(apiError.data?.message || 'Login failed.');
