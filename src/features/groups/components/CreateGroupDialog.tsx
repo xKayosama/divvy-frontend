@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { Spinner } from '@/components/ui/spinner';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
@@ -27,6 +28,7 @@ export default function CreateGroupDialog() {
     setMessage('');
     try {
       await create({ name: name.trim(), currency }).unwrap();
+      toast.add({ title: 'Group created.', type: 'success' });
       setOpen(false);
       setName('');
       setCurrency('PHP');

@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
@@ -50,7 +51,6 @@ export default function InvitationsPage() {
   const [code, setCode] = useState('');
   const [attempted, setAttempted] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [found, setFound] = useState<{
     invitation: Invitation;
     code: string;
@@ -135,11 +135,6 @@ export default function InvitationsPage() {
           </Link>
         }
       />
-      {notice && (
-        <Alert role="status">
-          <AlertDescription>{notice}</AlertDescription>
-        </Alert>
-      )}
       <Card className="rounded-2xl py-0 shadow-sm">
         <CardHeader className="border-b bg-secondary/35 px-5 py-5">
           <CardTitle>Have an invitation code?</CardTitle>
@@ -247,7 +242,7 @@ export default function InvitationsPage() {
             setFound(null);
             setCode('');
             setAttempted(false);
-            setNotice(message);
+            toast.add({ title: message, type: 'success' });
           }}
         />
       )}

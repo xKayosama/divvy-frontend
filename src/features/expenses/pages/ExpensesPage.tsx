@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import ReceiptScanDialog from '../components/ReceiptScanDialog';
 import type { ReceiptExpenseDraft } from '../receipt-types';
@@ -78,7 +79,6 @@ function GroupExpenses({ group }: { group: Group }) {
   >();
   const [detailId, setDetailId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Expense | null>(null);
-  const [notice, setNotice] = useState('');
   const badDates = !!(
     filters.startDate &&
     filters.endDate &&
@@ -140,7 +140,6 @@ function GroupExpenses({ group }: { group: Group }) {
   function openForm(expense: Expense | 'new') {
     setReceiptDraft(undefined);
     setDetailId(null);
-    setNotice('');
     setForm(expense);
   }
   return (
@@ -166,22 +165,6 @@ function GroupExpenses({ group }: { group: Group }) {
           </div>
         }
       />
-      {notice && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-secondary px-4 py-3 text-sm text-secondary-foreground"
-        >
-          {notice}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Dismiss message"
-            onClick={() => setNotice('')}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-      )}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card tone="brand" className="min-h-33 rounded-2xl py-0 shadow-sm">
           <CardContent className="relative p-5">
@@ -493,7 +476,6 @@ function GroupExpenses({ group }: { group: Group }) {
             setReceiptDraft(draft);
             setScanOpen(false);
             setForm('new');
-            setNotice('');
           }}
         />
       )}
@@ -508,9 +490,10 @@ function GroupExpenses({ group }: { group: Group }) {
             setReceiptDraft(undefined);
           }}
           onSaved={(expense) => {
-            setNotice(
-              `“${expense.description}” ${form === 'new' ? 'added' : 'updated'}. Balances will reflect this change.`,
-            );
+            toast.add({
+              title: `“${expense.description}” ${form === 'new' ? 'added' : 'updated'}. Balances will reflect this change.`,
+              type: 'success',
+            });
             if (form === 'new') filter({});
           }}
         />
@@ -535,7 +518,10 @@ function GroupExpenses({ group }: { group: Group }) {
           onClose={() => setDeleting(null)}
           onDeleted={() => {
             filter({});
-            setNotice('Expense deleted. Balances will reflect this change.');
+            toast.add({
+              title: 'Expense deleted. Balances will reflect this change.',
+              type: 'success',
+            });
           }}
         />
       )}

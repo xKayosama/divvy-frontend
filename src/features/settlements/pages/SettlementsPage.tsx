@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, RefreshCw } from 'lucide-react';
@@ -84,11 +85,10 @@ function SettlementsContent({
   }
   function done() {
     clear();
+    toast.add({ title: 'Repayment recorded.', type: 'success' });
     setSuggestion(null);
     setRecoverOpen(false);
-    setNotice(
-      'Repayment recorded. Balances and payment history have been refreshed.',
-    );
+    setNotice('');
   }
   return (
     <div className="flex w-full flex-col gap-6 pb-6">
@@ -139,7 +139,11 @@ function SettlementsContent({
               disabled={query.isFetching}
               onClick={() =>
                 dispatch(
-                  api.util.invalidateTags(['Settlement', 'Balance', 'Dashboard']),
+                  api.util.invalidateTags([
+                    'Settlement',
+                    'Balance',
+                    'Dashboard',
+                  ]),
                 )
               }
             >

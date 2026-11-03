@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Mail, UserPlus } from 'lucide-react';
@@ -55,7 +56,6 @@ function MembersContent({ group }: { group: Group }) {
     | { type: 'revoke'; invitation: Invitation }
     | null
   >(null);
-  const [notice, setNotice] = useState('');
   const accountId = user?._id || (user as { id?: string } | null)?.id;
   const visible = members.filter(
     (member) =>
@@ -90,11 +90,6 @@ function MembersContent({ group }: { group: Group }) {
           </div>
         }
       />
-      {notice && (
-        <Alert role="status">
-          <AlertDescription>{notice}</AlertDescription>
-        </Alert>
-      )}
       {!canManage && query.currentData && !query.error && (
         <Alert>
           <AlertDescription>
@@ -231,7 +226,7 @@ function MembersContent({ group }: { group: Group }) {
           onClose={() => setAction(null)}
           onDone={(message) => {
             setAction(null);
-            setNotice(message);
+            toast.add({ title: message, type: 'success' });
           }}
         />
       )}

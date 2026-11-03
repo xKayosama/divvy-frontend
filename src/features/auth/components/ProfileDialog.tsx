@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { Spinner } from '@/components/ui/spinner';
 import { useState, type FormEvent } from 'react';
 
@@ -37,7 +38,6 @@ export default function ProfileDialog({
   const [lastName, setLastName] = useState(user.lastName);
   const [attempted, setAttempted] = useState(false);
   const [error, setError] = useState('');
-  const [saved, setSaved] = useState(false);
   const firstInvalid = !firstName.trim() || firstName.trim().length > 100;
   const lastInvalid = !lastName.trim() || lastName.trim().length > 100;
   const changed =
@@ -48,7 +48,7 @@ export default function ProfileDialog({
     if (isLoading) return;
     setAttempted(true);
     setError('');
-    setSaved(false);
+
     if (firstInvalid || lastInvalid || !changed) return;
     const token = getStoredToken();
     try {
@@ -70,7 +70,8 @@ export default function ProfileDialog({
       );
       setFirstName(profile.firstName);
       setLastName(profile.lastName);
-      setSaved(true);
+
+      toast.add({ title: 'Profile updated.', type: 'success' });
     } catch (cause) {
       setError(
         apiMessage(cause, 'Could not update your profile. Please try again.'),
@@ -118,7 +119,7 @@ export default function ProfileDialog({
                 }
                 onChange={(event) => {
                   setFirstName(event.target.value);
-                  setSaved(false);
+
                   setError('');
                 }}
               />
@@ -147,7 +148,7 @@ export default function ProfileDialog({
                 }
                 onChange={(event) => {
                   setLastName(event.target.value);
-                  setSaved(false);
+
                   setError('');
                 }}
               />
@@ -165,11 +166,6 @@ export default function ProfileDialog({
           {error && (
             <p role="alert" className="text-sm text-destructive">
               {error}
-            </p>
-          )}
-          {saved && (
-            <p role="status" className="text-sm text-primary">
-              Profile updated.
             </p>
           )}
           <DialogFooter>

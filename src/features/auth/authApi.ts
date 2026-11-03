@@ -26,6 +26,12 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
+    verifyEmail: builder.mutation<AuthMessageResponse, { email: string; code: string }>({
+      query: (body) => ({ url: '/auth/verify-email', method: 'POST', body }),
+    }),
+    resendVerification: builder.mutation<AuthMessageResponse, { email: string }>({
+      query: (body) => ({ url: '/auth/resend-verification', method: 'POST', body }),
+    }),
     requestPasswordReset: builder.mutation<
       AuthMessageResponse,
       { email: string }
@@ -84,6 +90,8 @@ export const authApi = api.injectEndpoints({
 export const {
   useLogoutSessionMutation,
   useRegisterMutation,
+  useVerifyEmailMutation,
+  useResendVerificationMutation,
   useRequestPasswordResetMutation,
   useResetPasswordMutation,
   useLoginMutation,

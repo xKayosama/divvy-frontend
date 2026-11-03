@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { Spinner } from '@/components/ui/spinner';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import { useEffect, useRef, useState } from 'react';
@@ -120,7 +121,6 @@ function SettingsForm({
   const [name, setName] = useState(details.name);
   const [currency, setCurrency] = useState(details.currency);
   const [icon, setIcon] = useState(details.icon || 'people');
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [confirm, setConfirm] = useState(false);
   const [confirmation, setConfirmation] = useState('');
@@ -134,7 +134,6 @@ function SettingsForm({
     event.preventDefault();
     if (!owner || busy || fetching || !name.trim()) return;
     setError('');
-    setMessage('');
     try {
       const response = await update({
         id: group.id,
@@ -151,7 +150,7 @@ function SettingsForm({
         }),
       );
       setName(response.data.group.name);
-      setMessage('Group settings saved.');
+      toast.add({ title: 'Group settings saved.', type: 'success' });
     } catch (caught) {
       setError(
         apiMessage(caught, 'Could not save settings. Please try again.'),
@@ -164,6 +163,10 @@ function SettingsForm({
     try {
       await remove(group.id).unwrap();
       if (!active.current) return;
+      toast.add({
+        title: 'Group deleted. You can restore it from All Groups.',
+        type: 'success',
+      });
       dispatch(clearSelectedGroup());
       navigate('/groups', { replace: true });
     } catch (caught) {
@@ -231,7 +234,6 @@ function SettingsForm({
                 />
               </Field>
             </FieldGroup>
-            {message && <p role="status">{message}</p>}
             {error && !confirm && (
               <p role="alert" className="text-destructive">
                 {error}

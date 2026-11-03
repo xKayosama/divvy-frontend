@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/toast-manager';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import { PagePagination } from '@/components/ui/page-pagination';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -70,7 +71,6 @@ function GroupBills({
     [deleting, setDeleting] = useState<Bill | null>(null),
     [payment, setPayment] = useState<string | null>(null),
     [expense, setExpense] = useState<string | null>(null);
-  const [notice, setNotice] = useState('');
   const active = filters[view];
   const {
     currentData: data,
@@ -109,12 +109,10 @@ function GroupBills({
   function edit(bill: Bill | 'new') {
     setDetail(null);
     setForm(bill);
-    setNotice('');
   }
   function startPayment(id: string) {
     setDetail(null);
     setPayment(id);
-    setNotice('');
   }
   return (
     <div className="flex w-full flex-col gap-6 pb-6">
@@ -129,22 +127,6 @@ function GroupBills({
           </Button>
         }
       />
-      {notice && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-secondary px-4 py-3 text-sm text-secondary-foreground"
-        >
-          {notice}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Dismiss message"
-            onClick={() => setNotice('')}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-      )}
       <BillReminders
         groupId={group.id}
         currency={group.currency}
@@ -476,9 +458,10 @@ function GroupBills({
           currency={group.currency}
           onClose={() => setForm(null)}
           onSaved={(bill) => {
-            setNotice(
-              `“${bill.name}” ${form === 'new' ? 'added' : 'updated'}.`,
-            );
+            toast.add({
+              title: `“${bill.name}” ${form === 'new' ? 'added' : 'updated'}.`,
+              type: 'success',
+            });
             if (form === 'new') {
               setView('upcoming');
               setFilters((current) => ({
@@ -516,7 +499,7 @@ function GroupBills({
           onClose={() => setDeleting(null)}
           onDeleted={() => {
             change({});
-            setNotice('Bill deleted.');
+            toast.add({ title: 'Bill deleted.', type: 'success' });
           }}
         />
       )}
@@ -535,9 +518,10 @@ function GroupBills({
             }));
             setDraft((current) => ({ ...current, history: '' }));
             setDetail(bill._id);
-            setNotice(
-              `“${bill.name}” is paid. View its linked expense for the split.`,
-            );
+            toast.add({
+              title: `“${bill.name}” is paid. View its linked expense for the split.`,
+              type: 'success',
+            });
           }}
         />
       )}

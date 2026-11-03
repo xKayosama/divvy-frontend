@@ -58,9 +58,14 @@ const LoginPage = () => {
         const apiError = error as {
           data?: {
             message?: string;
+            code?: string;
           };
         };
 
+        if (apiError.data?.code === 'EMAIL_NOT_VERIFIED') {
+          navigate('/register', { state: { verificationEmail: email.trim().toLowerCase() } });
+          return;
+        }
         setErrorMessage(apiError.data?.message || 'Login failed.');
       } else {
         setErrorMessage('Something went wrong.');
