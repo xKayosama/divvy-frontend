@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '../components/AuthLayout';
 import { Link } from 'react-router-dom';
 import { buttonVariants } from '@/components/ui/button-variants';
@@ -19,14 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  LoaderCircle,
-  LockKeyhole,
-  Mail,
-} from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -174,10 +168,7 @@ const LoginPage = () => {
             >
               {isLoading ? (
                 <>
-                  <LoaderCircle
-                    className="size-4 animate-spin motion-reduce:animate-none"
-                    aria-hidden="true"
-                  />{' '}
+                  <Spinner data-icon="inline-start" aria-hidden="true" />{' '}
                   Signing in…
                 </>
               ) : (

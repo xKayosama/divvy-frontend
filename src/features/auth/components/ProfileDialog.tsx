@@ -1,5 +1,6 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState, type FormEvent } from 'react';
-import { LoaderCircle } from 'lucide-react';
+
 import { useAppDispatch } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import {
@@ -182,10 +183,7 @@ export default function ProfileDialog({
             </Button>
             <Button type="submit" disabled={isLoading || !changed}>
               {isLoading && (
-                <LoaderCircle
-                  data-icon="inline-start"
-                  className="animate-spin"
-                />
+                <Spinner data-icon="inline-start" aria-hidden="true" />
               )}
               {isLoading ? 'Saving…' : 'Save changes'}
             </Button>

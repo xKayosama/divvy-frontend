@@ -1,13 +1,15 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog';
 import { useDeleteExpenseMutation } from '../expenseApi';
 import type { Expense } from '../types';
 import { apiMessage } from '@/services/api-error';
@@ -36,31 +38,28 @@ export default function DeleteExpenseDialog({
     }
   }
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(value) => {
         if (!value && !isLoading) onClose();
       }}
     >
-      <DialogContent
-        className="rounded-3xl bg-card p-6 text-card-foreground sm:max-w-md"
-        showCloseButton={!isLoading}
-      >
+      <AlertDialogContent className="rounded-3xl bg-card p-6 text-card-foreground sm:max-w-md">
         <div className="grid size-12 place-items-center rounded-2xl bg-destructive/10 text-destructive">
           <Trash2 className="size-5" />
         </div>
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-xl font-semibold">
             Delete expense?
-          </DialogTitle>
-          <DialogDescription>
+          </AlertDialogTitle>
+          <AlertDialogDescription>
             This permanently removes “{expense.description}” and updates group
             balances.
             {expense.recurring
               ? ' Future entries from this schedule will stop. Existing occurrences will remain.'
               : ''}
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         {expense.billId && (
           <p className="text-sm text-destructive">
             Paid bill expenses cannot be deleted independently.
@@ -72,18 +71,25 @@ export default function DeleteExpenseDialog({
           </p>
         )}
         <div className="flex justify-end gap-2">
-          <Button variant="outline" disabled={isLoading} onClick={onClose}>
+          <AlertDialogCancel
+            variant="outline"
+            disabled={isLoading}
+            onClick={onClose}
+          >
             Keep expense
-          </Button>
-          <Button
+          </AlertDialogCancel>
+          <AlertDialogAction
             variant="destructive"
             disabled={isLoading || !!expense.billId}
             onClick={submit}
           >
+            {isLoading && (
+              <Spinner data-icon="inline-start" aria-hidden="true" />
+            )}
             {isLoading ? 'Deleting…' : 'Delete expense'}
-          </Button>
+          </AlertDialogAction>
         </div>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

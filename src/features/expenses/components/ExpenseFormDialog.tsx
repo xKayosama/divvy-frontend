@@ -1,7 +1,8 @@
+import { Spinner } from '@/components/ui/spinner';
 import type { ReceiptExpenseDraft } from '../receipt-types';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
-import { LoaderCircle, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { useGetGroupMembersQuery } from '@/features/members/memberApi';
 import type { MemberUser } from '@/features/members/types';
@@ -96,7 +97,7 @@ export default function ExpenseFormDialog(props: Props) {
           <DialogDescription>
             Please wait while we load your group members.
           </DialogDescription>
-          {isFetching && <LoaderCircle className="animate-spin text-primary" />}
+          {isFetching && <Spinner className="text-primary" />}
         </DialogContent>
       ) : (
         <ExpenseForm
@@ -808,7 +809,7 @@ function ExpenseForm({
             disabled={saving || !members.length || !!expense?.billId}
             className="h-10 px-5"
           >
-            {saving && <LoaderCircle className="size-4 animate-spin" />}
+            {saving && <Spinner data-icon="inline-start" aria-hidden="true" />}
             {saving ? 'Saving…' : expense ? 'Save changes' : 'Add expense'}
           </Button>
         </div>

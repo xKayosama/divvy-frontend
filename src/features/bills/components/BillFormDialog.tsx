@@ -1,6 +1,7 @@
+import { Spinner } from '@/components/ui/spinner';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
-import { LoaderCircle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -257,7 +258,7 @@ export default function BillFormDialog({
               className="h-10 px-5"
               disabled={busy || locked}
             >
-              {busy && <LoaderCircle className="size-4 animate-spin" />}
+              {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}
               {busy ? 'Saving…' : bill ? 'Save changes' : 'Add bill'}
             </Button>
           </div>

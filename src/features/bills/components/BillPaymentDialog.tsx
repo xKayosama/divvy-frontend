@@ -1,7 +1,8 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
 import BillPaymentSummary from './BillPaymentSummary';
 import BillPaymentForm from './BillPaymentForm';
-import { CheckCircle2, LoaderCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -156,7 +157,9 @@ export default function BillPaymentDialog({
                 disabled={busy || isFetching}
                 onClick={() => confirm({ resume: true }, bill)}
               >
-                {busy && <LoaderCircle className="size-4 animate-spin" />}
+                {busy && (
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
+                )}
                 {busy ? 'Finishing…' : 'Finish saved payment'}
               </Button>
             </div>

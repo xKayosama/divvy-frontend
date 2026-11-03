@@ -1,5 +1,6 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState, type FormEvent } from 'react';
-import { Copy, LoaderCircle } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -183,10 +184,7 @@ export default function InviteMemberDialog({
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && (
-                  <LoaderCircle
-                    className="animate-spin"
-                    data-icon="inline-start"
-                  />
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
                 )}
                 {isLoading ? 'Creating…' : 'Create invitation'}
               </Button>

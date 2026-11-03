@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -20,13 +21,15 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 import { apiMessage } from '@/services/api-error';
 import { clearSelectedGroup, setSelectedGroup } from '../groupSlice';
 import type { Group } from '../types';
@@ -240,6 +243,9 @@ function SettingsForm({
                   type="submit"
                   disabled={busy || fetching || !name.trim()}
                 >
+                  {saving.isLoading && (
+                    <Spinner data-icon="inline-start" aria-hidden="true" />
+                  )}
                   {saving.isLoading ? 'Saving…' : 'Save changes'}
                 </Button>
               </div>
@@ -272,20 +278,20 @@ function SettingsForm({
           </CardContent>
         </Card>
       )}
-      <Dialog
+      <AlertDialog
         open={confirm}
         onOpenChange={(value) => {
           if (!busy) setConfirm(value);
         }}
       >
-        <DialogContent showCloseButton={!busy}>
-          <DialogHeader>
-            <DialogTitle>Delete {details.name}?</DialogTitle>
-            <DialogDescription>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {details.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
               All members will lose access until you restore this group. Its
               records will be kept.
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <Field>
             <FieldLabel htmlFor="delete-group-name">
               Type {details.name} to confirm
@@ -302,24 +308,27 @@ function SettingsForm({
               {error}
             </p>
           )}
-          <DialogFooter>
-            <Button
+          <AlertDialogFooter>
+            <AlertDialogCancel
               variant="outline"
               disabled={busy}
               onClick={() => setConfirm(false)}
             >
               Cancel
-            </Button>
-            <Button
+            </AlertDialogCancel>
+            <AlertDialogAction
               variant="destructive"
               disabled={busy || confirmation !== details.name}
               onClick={deleteGroup}
             >
+              {deleting.isLoading && (
+                <Spinner data-icon="inline-start" aria-hidden="true" />
+              )}
               {deleting.isLoading ? 'Deleting…' : 'Delete group'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

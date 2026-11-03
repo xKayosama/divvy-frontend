@@ -1,13 +1,15 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog';
 import { apiMessage } from '@/services/api-error';
 import { useDeleteBillMutation } from '../billApi';
 import { billState } from '../lib/bill-state';
@@ -36,30 +38,27 @@ export default function DeleteBillDialog({
     }
   }
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(value) => {
         if (!value && !isLoading) onClose();
       }}
     >
-      <DialogContent
-        className="rounded-3xl bg-card p-6 text-card-foreground sm:max-w-md"
-        showCloseButton={!isLoading}
-      >
+      <AlertDialogContent className="rounded-3xl bg-card p-6 text-card-foreground sm:max-w-md">
         <span className="grid size-12 place-items-center rounded-2xl bg-destructive/10 text-destructive">
           <Trash2 className="size-5" />
         </span>
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-xl font-semibold">
             Delete bill?
-          </DialogTitle>
-          <DialogDescription>
+          </AlertDialogTitle>
+          <AlertDialogDescription>
             “{bill.name}” will be permanently removed.
             {bill.isRecurring
               ? ' Future generation will stop. Existing generated bills will remain.'
               : ''}
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         {(error || locked) && (
           <p role="alert" className="text-sm text-destructive">
             {locked
@@ -68,18 +67,25 @@ export default function DeleteBillDialog({
           </p>
         )}
         <div className="flex justify-end gap-2">
-          <Button variant="outline" disabled={isLoading} onClick={onClose}>
+          <AlertDialogCancel
+            variant="outline"
+            disabled={isLoading}
+            onClick={onClose}
+          >
             Keep bill
-          </Button>
-          <Button
+          </AlertDialogCancel>
+          <AlertDialogAction
             variant="destructive"
             disabled={isLoading || locked}
             onClick={submit}
           >
+            {isLoading && (
+              <Spinner data-icon="inline-start" aria-hidden="true" />
+            )}
             {isLoading ? 'Deleting…' : 'Delete bill'}
-          </Button>
+          </AlertDialogAction>
         </div>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

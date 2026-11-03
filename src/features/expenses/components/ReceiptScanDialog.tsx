@@ -1,6 +1,7 @@
+import { Spinner } from '@/components/ui/spinner';
 import ReceiptScanProgress from './ReceiptScanProgress';
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Upload, ScanLine, LoaderCircle } from 'lucide-react';
+import { Camera, Upload, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -212,10 +213,7 @@ export default function ReceiptScanDialog({
                 disabled={!file || !!receiptFileError(file) || busy}
               >
                 {busy ? (
-                  <LoaderCircle
-                    data-icon="inline-start"
-                    className="animate-spin"
-                  />
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
                 ) : (
                   <ScanLine data-icon="inline-start" />
                 )}

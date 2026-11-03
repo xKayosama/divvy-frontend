@@ -1,6 +1,7 @@
+import { Spinner } from '@/components/ui/spinner';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
-import { ShieldCheck, LoaderCircle } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { useGetGroupMembersQuery } from '@/features/members/memberApi';
 import type { MemberUser } from '@/features/members/types';
@@ -295,7 +296,7 @@ function PaymentForm({
           className="h-10 px-5"
           disabled={busy || !members.length}
         >
-          {busy && <LoaderCircle className="size-4 animate-spin" />}
+          {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}
           {busy ? 'Recording…' : review ? 'Confirm payment' : 'Review payment'}
         </Button>
       </div>

@@ -1,5 +1,6 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState, type FormEvent } from 'react';
-import { LoaderCircle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -265,10 +266,7 @@ export default function RecordSettlementDialog({
               )}
               <Button disabled={busy} onClick={confirm}>
                 {busy && (
-                  <LoaderCircle
-                    data-icon="inline-start"
-                    className="animate-spin"
-                  />
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
                 )}
                 {busy
                   ? 'Saving…'

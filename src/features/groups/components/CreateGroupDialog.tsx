@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner';
 import { FormSelect } from '@/components/ui/form-select';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
@@ -106,6 +107,9 @@ export default function CreateGroupDialog() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading || !name.trim()}>
+                {isLoading && (
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
+                )}
                 {isLoading ? 'Creating…' : 'Create group'}
               </Button>
             </div>

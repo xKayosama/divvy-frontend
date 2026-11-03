@@ -1,13 +1,15 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { apiMessage } from '@/services/api-error';
 import {
@@ -61,35 +63,44 @@ export default function MemberActionDialog({
     }
   }
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(open) => {
         if (!open && !busy) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
-        <DialogHeader>
-          <DialogTitle>{title}?</DialogTitle>
-          <DialogDescription>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}?</AlertDialogTitle>
+          <AlertDialogDescription>
             {action.type === 'remove'
               ? `${action.member.userId.firstName} ${action.member.userId.lastName} will lose access to this group. Existing expenses stay recorded.`
               : `${action.invitation.email} will no longer be able to accept this invitation.`}
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <DialogFooter>
-          <Button variant="outline" disabled={busy} onClick={onClose}>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            variant="outline"
+            disabled={busy}
+            onClick={onClose}
+          >
             Cancel
-          </Button>
-          <Button variant="destructive" disabled={busy} onClick={confirm}>
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={busy}
+            onClick={confirm}
+          >
+            {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}
             {busy ? 'Working…' : title}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

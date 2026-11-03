@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -138,6 +139,9 @@ export default function RegisterPage() {
             </Alert>
           )}
           <Button type="submit" disabled={state.isLoading}>
+            {state.isLoading && (
+              <Spinner data-icon="inline-start" aria-hidden="true" />
+            )}
             {state.isLoading ? 'Creating account…' : 'Create account'}
           </Button>
         </form>

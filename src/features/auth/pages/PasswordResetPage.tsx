@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppDispatch } from '@/app/hooks';
@@ -243,7 +244,8 @@ export default function PasswordResetPage({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Button type="submit" disabled={busy}>
+          <Button type="submit" disabled={busy} aria-busy={busy}>
+            {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}
             {busy
               ? step === 'email'
                 ? 'Sending code…'
