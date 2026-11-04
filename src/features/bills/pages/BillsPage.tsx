@@ -11,6 +11,7 @@ import { ArrowUpRight, FileText, Plus, Repeat2, Search, X } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Group } from '@/features/groups/types';
 import { formatLabel as categoryLabel, personName } from '@/lib/format';
 import { currencyMoney } from '@/lib/finance/money';
@@ -115,13 +116,19 @@ function GroupBills({
     setPayment(id);
   }
   return (
-    <div className="flex w-full flex-col gap-6 pb-6">
+    <Tabs
+      value={view}
+      onValueChange={(value) => {
+        if (value === 'upcoming' || value === 'history') setView(value);
+      }}
+      className="w-full gap-6 pb-6"
+    >
       <PageHeader
         eyebrow={`${group.name} · Stay ahead`}
         title="Upcoming bills"
         description="Know what’s due. Keep a clear record of what’s paid."
         action={
-          <Button className="h-11 px-5" onClick={() => edit('new')}>
+          <Button size="xl" onClick={() => edit('new')}>
             <Plus data-icon="inline-start" />
             Add bill
           </Button>
@@ -132,59 +139,20 @@ function GroupBills({
         currency={group.currency}
         onOpen={setDetail}
       />
-      <div
-        role="tablist"
+      <TabsList
         aria-label="Bill views"
-        onKeyDown={(event) => {
-          const next =
-            event.key === 'Home'
-              ? 'upcoming'
-              : event.key === 'End'
-                ? 'history'
-                : ['ArrowLeft', 'ArrowRight'].includes(event.key)
-                  ? view === 'upcoming'
-                    ? 'history'
-                    : 'upcoming'
-                  : null;
-          if (next) {
-            event.preventDefault();
-            setView(next);
-            document.getElementById(`bills-${next}-tab`)?.focus();
-          }
-        }}
-        className="flex w-fit gap-1 rounded-2xl border bg-card p-1"
+        activateOnFocus
+        loopFocus
+        className="grid grid-cols-2 p-1 group-data-[orientation=horizontal]/tabs:h-12"
       >
-        <Button
-          role="tab"
-          id="bills-upcoming-tab"
-          aria-controls="bills-panel"
-          aria-selected={view === 'upcoming'}
-          tabIndex={view === 'upcoming' ? 0 : -1}
-          variant={view === 'upcoming' ? 'default' : 'ghost'}
-          className="h-10 px-5"
-          onClick={() => setView('upcoming')}
-        >
+        <TabsTrigger value="upcoming" className="h-full px-4">
           Unpaid
-        </Button>
-        <Button
-          role="tab"
-          id="bills-history-tab"
-          aria-controls="bills-panel"
-          aria-selected={view === 'history'}
-          tabIndex={view === 'history' ? 0 : -1}
-          variant={view === 'history' ? 'default' : 'ghost'}
-          className="h-10 px-5"
-          onClick={() => setView('history')}
-        >
+        </TabsTrigger>
+        <TabsTrigger value="history" className="h-full px-4">
           History
-        </Button>
-      </div>
-      <div
-        id="bills-panel"
-        role="tabpanel"
-        aria-labelledby={`bills-${view}-tab`}
-        className="space-y-5"
-      >
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent key={view} value={view} className="flex flex-col gap-5">
         <Card
           role="region"
           aria-label="Bill filters"
@@ -205,7 +173,7 @@ function GroupBills({
                   type="search"
                   maxLength={200}
                   className="h-11 pl-10"
-                  placeholder="Search bill names or notes…"
+                  placeholder="Search bills…"
                   value={draft[view]}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -220,7 +188,7 @@ function GroupBills({
               </Button>
             </form>
             <div
-              className={`grid grid-cols-2 gap-3 ${view === 'upcoming' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}
+              className={`grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 ${view === 'upcoming' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}
             >
               <label className="space-y-2 text-xs font-medium">
                 Category
@@ -413,7 +381,8 @@ function GroupBills({
                     </Button>
                     {billState(bill) !== 'paid' && (
                       <Button
-                        className="ml-auto h-9 px-3"
+                        size="lg"
+                        className="ml-auto"
                         variant="outline"
                         aria-label={`${billState(bill) === 'saved-payment' ? 'Finish saved payment for' : 'Record payment for'} ${bill.name}`}
                         onClick={() => startPayment(bill._id)}
@@ -449,7 +418,7 @@ function GroupBills({
             )}
           </CardContent>
         </Card>
-      </div>
+      </TabsContent>
       {form && (
         <BillFormDialog
           key={form === 'new' ? 'new' : form._id}
@@ -535,6 +504,6 @@ function GroupBills({
           onOpenSource={setExpense}
         />
       )}
-    </div>
+    </Tabs>
   );
 }

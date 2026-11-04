@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState } from 'react';
-import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
+import { LogOut, UserCircle } from 'lucide-react';
 import { useAppSelector } from '@/app/hooks';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +20,12 @@ export default function AccountMenu() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { signOut, isLoading, error } = useSignOut();
-  const name = user ? `${user.firstName} ${user.lastName}` : 'Your account';
+  const nameParts = [user?.firstName?.trim() ?? '', user?.lastName?.trim() ?? ''];
+  const name = nameParts.filter(Boolean).join(' ') || 'Your account';
+  const initials = nameParts
+    .map((part) => Array.from(part)[0])
+    .join('')
+    .toUpperCase();
 
   return (
     <>
@@ -35,26 +40,18 @@ export default function AccountMenu() {
           title="Profile and account options"
           render={
             <Button
-              variant="outline"
-              className="h-auto shrink-0 gap-1 px-2 py-1.5"
+              variant="ghost"
+              size="xl"
+              className="size-10 rounded-full p-1"
             />
           }
         >
-          <span className="hidden min-w-0 text-right sm:block">
-            <span className="block max-w-40 truncate font-semibold">
-              {name}
-            </span>
-            <span className="block text-xs text-muted-foreground">
-              Your account
-            </span>
-          </span>
-          <Avatar className="size-9" aria-hidden="true">
+          <Avatar aria-hidden="true">
             <AvatarImage src={user?.avatar ?? undefined} alt="" />
             <AvatarFallback>
-              {user?.firstName?.charAt(0).toUpperCase() || <UserCircle />}
+              {initials || <UserCircle />}
             </AvatarFallback>
           </Avatar>
-          <ChevronDown data-icon="inline-end" aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

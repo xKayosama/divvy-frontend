@@ -254,8 +254,8 @@ function GroupExpenses({ group }: { group: Group }) {
               Search
             </Button>
           </form>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <label className="space-y-2 text-xs font-medium">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="flex min-w-0 flex-col gap-2 text-xs font-medium">
               Category
               <FormSelect
                 aria-label="Filter category"
@@ -270,29 +270,29 @@ function GroupExpenses({ group }: { group: Group }) {
                 ]}
               />
             </label>
-            <label className="space-y-2 text-xs font-medium">
+            <label className="flex min-w-0 flex-col gap-2 text-xs font-medium">
               From (UTC)
               <Input
                 aria-label="From date"
                 type="date"
-                className="h-11 min-w-0"
+                className="h-11 min-w-0 max-w-full appearance-none [&::-webkit-date-and-time-value]:min-w-0 [&::-webkit-date-and-time-value]:text-left"
                 value={filters.startDate}
                 max={filters.endDate || undefined}
                 onChange={(event) => filter({ startDate: event.target.value })}
               />
             </label>
-            <label className="space-y-2 text-xs font-medium">
+            <label className="flex min-w-0 flex-col gap-2 text-xs font-medium">
               To (UTC)
               <Input
                 aria-label="To date"
                 type="date"
-                className="h-11 min-w-0"
+                className="h-11 min-w-0 max-w-full appearance-none [&::-webkit-date-and-time-value]:min-w-0 [&::-webkit-date-and-time-value]:text-left"
                 value={filters.endDate}
                 min={filters.startDate || undefined}
                 onChange={(event) => filter({ endDate: event.target.value })}
               />
             </label>
-            <label className="space-y-2 text-xs font-medium">
+            <label className="flex min-w-0 flex-col gap-2 text-xs font-medium">
               Sort by
               <FormSelect
                 aria-label="Sort expenses"

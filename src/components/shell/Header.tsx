@@ -1,3 +1,4 @@
+import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
 import AccountMenu from '@/features/auth/components/AccountMenu';
 
@@ -16,6 +17,7 @@ const Header = () => {
         </div>
       </div>
 
+      <ThemeToggle />
       <NotificationBell />
       <AccountMenu />
     </header>

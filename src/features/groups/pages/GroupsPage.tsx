@@ -1,3 +1,4 @@
+import ThemeToggle from '@/components/theme/ThemeToggle';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
 import { buttonVariants } from '@/components/ui/button-variants';
@@ -26,10 +27,11 @@ export default function GroupsPage() {
   );
   return (
     <main className="min-h-svh bg-background bg-brand-screen">
-      <header className="border-b bg-white">
+      <header className="border-b bg-card">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8">
           <Brand />
           <div className="flex flex-wrap items-center gap-2">
+            <ThemeToggle />
             <NotificationBell />
             <Link
               to="/invitations"
@@ -59,7 +61,7 @@ export default function GroupsPage() {
           <CreateGroupDialog />
         </div>
         <div className="mb-8 grid gap-4 sm:grid-cols-2">
-          <div className="flex items-center gap-4 rounded-2xl border bg-white p-5">
+          <div className="flex items-center gap-4 rounded-2xl border bg-card p-5">
             <Users className="size-6 text-primary" />
             <div>
               <p className="text-2xl font-semibold">{groups.length}</p>
@@ -82,7 +84,7 @@ export default function GroupsPage() {
             <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
             <Input
               aria-label="Search groups"
-              className="h-10 bg-white pl-9"
+              className="h-10 bg-card pl-9"
               placeholder="Find a group…"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -94,7 +96,7 @@ export default function GroupsPage() {
         ) : isError ? (
           <div
             role="alert"
-            className="rounded-2xl border bg-white p-10 text-center"
+            className="rounded-2xl border bg-card p-10 text-center"
           >
             <p className="mb-4">We couldn’t load your groups.</p>
             <Button variant="outline" onClick={() => refetch()}>
@@ -102,7 +104,7 @@ export default function GroupsPage() {
             </Button>
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-2xl border border-dashed bg-white p-12 text-center">
+          <div className="rounded-2xl border border-dashed bg-card p-12 text-center">
             <Users className="mx-auto mb-4 size-10 text-primary" />
             <h3 className="text-xl font-semibold">
               {search ? 'No matching groups' : 'Good things start with a group'}

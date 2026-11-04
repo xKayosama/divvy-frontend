@@ -282,10 +282,11 @@ function PaymentForm({
           {message}
         </p>
       )}
-      <div className="relative flex shrink-0 justify-end gap-2 border-t bg-card p-4">
+      <div className="relative flex shrink-0 flex-wrap justify-end gap-2 border-t bg-card p-4">
         <Button
           type="button"
           variant="outline"
+          size="xl"
           disabled={busy}
           onClick={() => (review ? setReview(false) : onClose())}
         >
@@ -293,7 +294,7 @@ function PaymentForm({
         </Button>
         <Button
           type="submit"
-          className="h-10 px-5"
+          size="xl"
           disabled={busy || !members.length}
         >
           {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}

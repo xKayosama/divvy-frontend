@@ -4,7 +4,7 @@ import { Check, Receipt, Users } from 'lucide-react';
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <main className="min-h-svh bg-background bg-brand-screen p-3 font-sans text-foreground sm:p-6 lg:p-8">
-      <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] max-w-7xl sm:min-h-[calc(100svh-3rem)] lg:min-h-[calc(100svh-4rem)] overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm lg:grid-cols-[1.05fr_1fr]">
+      <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] max-w-7xl sm:min-h-[calc(100svh-3rem)] lg:min-h-[calc(100svh-4rem)] overflow-hidden rounded-3xl border border-border bg-card shadow-sm lg:grid-cols-[1.05fr_1fr]">
         <section
           className="relative flex flex-col justify-between overflow-hidden bg-brand-spending p-5 text-white sm:p-8 lg:p-14"
           aria-labelledby="brand-heading"

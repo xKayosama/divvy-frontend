@@ -80,7 +80,7 @@ const LoginPage = () => {
       <Card className="mx-auto w-full max-w-sm gap-0 overflow-visible bg-transparent py-0 shadow-none ring-0">
         <CardHeader className="gap-0 px-0">
           {/* <span className="mb-6 hidden size-12 items-center justify-center rounded-2xl border border-[#087F65]/10 bg-[#E5F5EE] text-[#087F65] lg:flex"><LockKeyhole className="size-5" aria-hidden="true" /></span> */}
-          <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#08634F] uppercase">
+          <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
             Your group, on the same page
           </p>
           <CardTitle className="text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -116,7 +116,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   required
-                  className="h-12 text-base md:text-base rounded-xl border-border bg-white pl-11 focus-visible:border-[#08634F] focus-visible:ring-[#08634F]/15"
+                  className="h-12 text-base md:text-base rounded-xl border-border bg-card pl-11 focus-visible:border-ring focus-visible:ring-ring/15"
                 />
               </div>
             </div>
@@ -139,7 +139,7 @@ const LoginPage = () => {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   required
-                  className="h-12 text-base md:text-base rounded-xl border-border bg-white pr-12 pl-11 focus-visible:border-[#08634F] focus-visible:ring-[#08634F]/15"
+                  className="h-12 text-base md:text-base rounded-xl border-border bg-card pr-12 pl-11 focus-visible:border-ring focus-visible:ring-ring/15"
                 />
                 <Button
                   variant="ghost"
@@ -148,7 +148,7 @@ const LoginPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
-                  className="absolute top-1 right-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-[#08634F]"
+                  className="absolute top-1 right-1 flex size-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {showPassword ? (
                     <EyeOff className="size-4" aria-hidden="true" />

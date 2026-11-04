@@ -29,6 +29,7 @@ export default function BillReminders({
         </h2>
         <Button
           variant="ghost"
+          size="lg"
           className="text-primary"
           onClick={() => setShowReminders((current) => !current)}
           aria-expanded={showReminders}
@@ -42,7 +43,7 @@ export default function BillReminders({
           className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card p-4 text-sm"
         >
           <p>Bill reminders are temporarily unavailable.</p>
-          <Button variant="outline" onClick={() => overview.refetch()}>
+          <Button variant="outline" size="lg" onClick={() => overview.refetch()}>
             Retry reminders
           </Button>
         </div>

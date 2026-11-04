@@ -40,6 +40,7 @@ Cross-feature imports should express a real domain relationship. For example, Bi
 ## Shared code
 
 - `components/ui/`: local shadcn/Base UI primitives. Keep feature requests/business logic out of these files. The shadcn configuration points to `lib/utils.ts` for `cn`. Controlled dropdowns use the shared `components/ui/form-select.tsx` wrapper around the local shadcn Select. It accepts labeled options and preserves explicit empty-string filter values.
+- `components/theme/`: browser-local Light/Dark appearance selection and shared theme control. Initialization in `index.html` applies the preference before first paint.
 - `components/brand/`: the shared wordmark/icon components. Active files live under `public/brand/`; original legacy/design assets are retained separately.
 - `components/shell/`: header/sidebar/layout and `navigation.ts`. The shell composes the local shadcn Sidebar provider, menus and trigger; mobile navigation uses its Sheet. Shared Sidebar context lives in `components/ui/sidebar-context.ts`, and responsive media subscriptions in `hooks/use-mobile.ts`.
 - `lib/finance/`: currency precision, money formatting/validation, split calculations and shared split/recurrence contracts. It has no dependency on Expenses or Bills.

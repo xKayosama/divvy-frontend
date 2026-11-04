@@ -207,7 +207,7 @@ export default function BillDetailsDialog({
           )}
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t p-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button size="xl" variant="outline" onClick={onClose}>
             Close
           </Button>
           {bill && !error && !wrongGroup && (
@@ -215,6 +215,7 @@ export default function BillDetailsDialog({
               {state === 'unpaid' && (
                 <>
                   <Button
+                    size="xl"
                     variant="destructive"
                     disabled={isFetching}
                     onClick={() => onDelete(bill)}
@@ -223,6 +224,7 @@ export default function BillDetailsDialog({
                     Delete
                   </Button>
                   <Button
+                    size="xl"
                     variant="outline"
                     disabled={isFetching}
                     onClick={() => onEdit(bill)}
@@ -233,7 +235,11 @@ export default function BillDetailsDialog({
                 </>
               )}
               {state !== 'paid' && (
-                <Button disabled={isFetching} onClick={() => onPay(bill._id)}>
+                <Button
+                  size="xl"
+                  disabled={isFetching}
+                  onClick={() => onPay(bill._id)}
+                >
                   {state === 'saved-payment'
                     ? 'Finish saved payment'
                     : 'Record payment'}

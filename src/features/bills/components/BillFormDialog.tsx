@@ -244,10 +244,11 @@ export default function BillFormDialog({
                 : error}
             </p>
           )}
-          <div className="relative flex shrink-0 justify-end gap-3 border-t bg-card p-4">
+          <div className="relative flex shrink-0 flex-wrap justify-end gap-3 border-t bg-card p-4">
             <Button
               type="button"
               variant="outline"
+              size="xl"
               disabled={busy}
               onClick={onClose}
             >
@@ -255,7 +256,7 @@ export default function BillFormDialog({
             </Button>
             <Button
               type="submit"
-              className="h-10 px-5"
+              size="xl"
               disabled={busy || locked}
             >
               {busy && <Spinner data-icon="inline-start" aria-hidden="true" />}

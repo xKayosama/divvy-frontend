@@ -183,3 +183,44 @@ body {
     transform: translateY(104px);
   }
 }
+
+/* Crossfade the full surface, including theme gradients, without layout motion. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition-property:
+      background-color, color, border-color, box-shadow, fill, stroke !important;
+    transition-duration: 280ms !important;
+    transition-timing-function: ease-in-out !important;
+  }
+
+  .theme-toggle-icon {
+    animation: theme-icon-enter 280ms ease-out;
+  }
+}
+
+@keyframes theme-icon-enter {
+  from {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

@@ -149,11 +149,12 @@ export default function BillPaymentDialog({
                 {message}
               </p>
             )}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" disabled={busy} onClick={onClose}>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button size="xl" variant="outline" disabled={busy} onClick={onClose}>
                 Close
               </Button>
               <Button
+                size="xl"
                 disabled={busy || isFetching}
                 onClick={() => confirm({ resume: true }, bill)}
               >
