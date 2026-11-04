@@ -13,6 +13,10 @@ import type {
   UpdateProfileResponse,
 } from './types';
 
+const profileTags = [
+  'Auth', 'Group', 'Member', 'Dashboard', 'Expense', 'Bill', 'Balance', 'Settlement',
+] as const;
+
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
     logoutSession: builder.mutation<{ success: boolean }, void>({
@@ -72,19 +76,16 @@ export const authApi = api.injectEndpoints({
       UpdateProfileRequest
     >({
       query: (body) => ({ url: '/auth/me', method: 'PATCH', body }),
-      invalidatesTags: (result) =>
-        result
-          ? [
-              'Auth',
-              'Group',
-              'Member',
-              'Dashboard',
-              'Expense',
-              'Bill',
-              'Balance',
-              'Settlement',
-            ]
-          : [],
+      invalidatesTags: (result) => (result ? profileTags : []),
+    }),
+    updateAvatar: builder.mutation<UpdateProfileResponse, File | null>({
+      query: (file) => {
+        if (!file) return { url: '/auth/me/avatar', method: 'DELETE' };
+        const body = new FormData();
+        body.set('avatar', file);
+        return { url: '/auth/me/avatar', method: 'PUT', body };
+      },
+      invalidatesTags: (result) => (result ? profileTags : []),
     }),
     getMe: builder.query<MeResponse, void>({
       query: () => '/auth/me',
@@ -111,4 +112,5 @@ export const {
   useLoginMutation,
   useGetMeQuery,
   useUpdateProfileMutation,
+  useUpdateAvatarMutation,
 } = authApi;

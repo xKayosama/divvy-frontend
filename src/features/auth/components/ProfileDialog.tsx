@@ -1,8 +1,10 @@
 import { toast } from '@/components/ui/toast-manager';
 import { Spinner } from '@/components/ui/spinner';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 
 import { useAppDispatch } from '@/app/hooks';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -21,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { apiMessage } from '@/services/api-error';
 import { getStoredToken } from '@/services/session';
-import { useUpdateProfileMutation } from '../authApi';
+import { useUpdateAvatarMutation, useUpdateProfileMutation } from '../authApi';
 import { setUser } from '../authSlice';
 import type { User } from '../types';
 
@@ -34,6 +36,10 @@ export default function ProfileDialog({
 }) {
   const dispatch = useAppDispatch();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+  const [updateAvatar, { isLoading: isUpdatingAvatar }] = useUpdateAvatarMutation();
+  const photoInput = useRef<HTMLInputElement>(null);
+  const [photoError, setPhotoError] = useState('');
+  const busy = isLoading || isUpdatingAvatar;
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [attempted, setAttempted] = useState(false);
@@ -45,7 +51,7 @@ export default function ProfileDialog({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (isLoading) return;
+    if (busy) return;
     setAttempted(true);
     setError('');
 
@@ -65,6 +71,7 @@ export default function ProfileDialog({
           firstName: profile.firstName,
           lastName: profile.lastName,
           email: profile.email,
+          avatar: profile.avatar === undefined ? user.avatar : profile.avatar,
           role: profile.role ?? user.role,
         }),
       );
@@ -79,29 +86,89 @@ export default function ProfileDialog({
     }
   }
 
+  async function changePhoto(file: File | null) {
+    if (busy) return;
+    setPhotoError('');
+    if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+      file.size === 0 || file.size > 5 * 1024 * 1024)) {
+      setPhotoError('Choose a JPEG, PNG, or WebP image up to 5 MB.');
+      return;
+    }
+    const token = getStoredToken();
+    try {
+      const { data } = await updateAvatar(file).unwrap();
+      if (!token || token !== getStoredToken()) return;
+      dispatch(setUser({ ...user, avatar: data.user.avatar ?? null }));
+      toast.add({ title: file ? 'Profile photo updated.' : 'Profile photo removed.', type: 'success' });
+    } catch (cause) {
+      setPhotoError(apiMessage(cause, 'Could not update your profile photo. Please try again.'));
+    }
+  }
+
   return (
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open && !isLoading) onClose();
+        if (!open && !busy) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-md" showCloseButton={!isLoading}>
+      <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
         <DialogHeader>
           <DialogTitle>Your profile</DialogTitle>
           <DialogDescription>
-            Update the name shown on your Divvy account.
+            Update your photo and the name shown on your Divvy account.
           </DialogDescription>
         </DialogHeader>
         <form
           onSubmit={submit}
           noValidate
           className="flex flex-col gap-6"
-          aria-busy={isLoading}
+          aria-busy={busy}
         >
           <FieldGroup>
+            <Field>
+              <div className="flex flex-wrap items-center gap-3">
+                <Avatar size="lg" aria-hidden="true">
+                  <AvatarImage src={user.avatar ?? undefined} alt="" />
+                  <AvatarFallback><UserCircle className="size-5" /></AvatarFallback>
+                </Avatar>
+                <input
+                  ref={photoInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                  disabled={busy}
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (file) void changePhoto(file);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xl"
+                  disabled={busy}
+                  onClick={() => photoInput.current?.click()}
+                >
+                  {isUpdatingAvatar ? 'Updating photo…' : 'Change photo'}
+                </Button>
+                {user.avatar && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xl"
+                    disabled={busy}
+                    onClick={() => void changePhoto(null)}
+                  >
+                    Remove photo
+                  </Button>
+                )}
+              </div>
+              {photoError && <FieldError>{photoError}</FieldError>}
+            </Field>
             <Field
-              data-disabled={isLoading}
+              data-disabled={busy}
               data-invalid={attempted && firstInvalid}
             >
               <FieldLabel htmlFor="profile-first-name">First name</FieldLabel>
@@ -112,7 +179,7 @@ export default function ProfileDialog({
                 value={firstName}
                 maxLength={100}
                 required
-                disabled={isLoading}
+                disabled={busy}
                 aria-invalid={attempted && firstInvalid}
                 aria-describedby={
                   attempted && firstInvalid ? 'profile-first-error' : undefined
@@ -130,7 +197,7 @@ export default function ProfileDialog({
               )}
             </Field>
             <Field
-              data-disabled={isLoading}
+              data-disabled={busy}
               data-invalid={attempted && lastInvalid}
             >
               <FieldLabel htmlFor="profile-last-name">Last name</FieldLabel>
@@ -141,7 +208,7 @@ export default function ProfileDialog({
                 value={lastName}
                 maxLength={100}
                 required
-                disabled={isLoading}
+                disabled={busy}
                 aria-invalid={attempted && lastInvalid}
                 aria-describedby={
                   attempted && lastInvalid ? 'profile-last-error' : undefined
@@ -173,12 +240,12 @@ export default function ProfileDialog({
               size="xl"
               type="button"
               variant="outline"
-              disabled={isLoading}
+              disabled={busy}
               onClick={onClose}
             >
               Close
             </Button>
-            <Button size="xl" type="submit" disabled={isLoading || !changed}>
+            <Button size="xl" type="submit" disabled={busy || !changed}>
               {isLoading && (
                 <Spinner data-icon="inline-start" aria-hidden="true" />
               )}
