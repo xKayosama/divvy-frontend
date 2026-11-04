@@ -170,6 +170,7 @@ export default function ProfileDialog({
           )}
           <DialogFooter>
             <Button
+              size="xl"
               type="button"
               variant="outline"
               disabled={isLoading}
@@ -177,7 +178,7 @@ export default function ProfileDialog({
             >
               Close
             </Button>
-            <Button type="submit" disabled={isLoading || !changed}>
+            <Button size="xl" type="submit" disabled={isLoading || !changed}>
               {isLoading && (
                 <Spinner data-icon="inline-start" aria-hidden="true" />
               )}

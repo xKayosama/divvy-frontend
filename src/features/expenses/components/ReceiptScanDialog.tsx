@@ -342,7 +342,7 @@ export default function ReceiptScanDialog({
           )}
         </div>
         <div className="flex shrink-0 justify-end border-t px-6 py-4">
-          <Button variant="outline" onClick={close}>
+          <Button size="xl" variant="outline" onClick={close}>
             {busy ? 'Cancel scan' : 'Cancel'}
           </Button>
         </div>

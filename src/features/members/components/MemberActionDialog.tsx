@@ -85,6 +85,7 @@ export default function MemberActionDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel
+            size="xl"
             variant="outline"
             disabled={busy}
             onClick={onClose}
@@ -92,6 +93,7 @@ export default function MemberActionDialog({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
+            size="xl"
             variant="destructive"
             disabled={busy}
             onClick={confirm}

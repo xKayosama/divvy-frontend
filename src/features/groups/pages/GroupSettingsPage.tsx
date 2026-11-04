@@ -1,3 +1,4 @@
+import { groupIconOptions } from '../lib/group-icons';
 import { toast } from '@/components/ui/toast-manager';
 import { Spinner } from '@/components/ui/spinner';
 import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
@@ -42,20 +43,6 @@ import {
 } from '../settingsApi';
 import currencies from '../currencies.json';
 import GroupActivity from '../components/GroupActivity';
-const icons = [
-  'people',
-  'home',
-  'heart',
-  'airplane',
-  'car',
-  'restaurant',
-  'cafe',
-  'briefcase',
-  'school',
-  'game-controller',
-  'football',
-  'paw',
-];
 export default function GroupSettingsPage() {
   const group = useAppSelector((state) => state.groups.selectedGroup);
   return group ? (
@@ -227,10 +214,7 @@ function SettingsForm({
                   value={icon}
                   onValueChange={setIcon}
                   disabled={!owner || busy}
-                  options={icons.map((value) => ({
-                    value,
-                    label: value.replaceAll('-', ' '),
-                  }))}
+                  options={groupIconOptions}
                 />
               </Field>
             </FieldGroup>
@@ -312,6 +296,7 @@ function SettingsForm({
           )}
           <AlertDialogFooter>
             <AlertDialogCancel
+              size="xl"
               variant="outline"
               disabled={busy}
               onClick={() => setConfirm(false)}
@@ -319,6 +304,7 @@ function SettingsForm({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
+              size="xl"
               variant="destructive"
               disabled={busy || confirmation !== details.name}
               onClick={deleteGroup}

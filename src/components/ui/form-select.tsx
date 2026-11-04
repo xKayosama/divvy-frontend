@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -10,6 +11,7 @@ import {
 interface SelectOption {
   value: string;
   label: string;
+  icon?: LucideIcon;
   disabled?: boolean;
 }
 interface FormSelectProps {
@@ -24,6 +26,16 @@ interface FormSelectProps {
   placeholder?: string;
   className?: string;
 }
+function OptionLabel({ label, icon: Icon }: SelectOption) {
+  if (!Icon) return label;
+  return (
+    <span className="flex min-w-0 items-center gap-2">
+      <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
+      <span className="truncate">{label}</span>
+    </span>
+  );
+}
+
 // A controlled shadcn Select with shared form sizing and explicit option labels.
 export function FormSelect({
   value,
@@ -37,6 +49,8 @@ export function FormSelect({
   placeholder = 'Choose an option',
   className,
 }: FormSelectProps) {
+  const selected = options.find((option) => option.value === value);
+
   return (
     <Select
       value={value}
@@ -54,8 +68,7 @@ export function FormSelect({
         className={cn('w-full min-w-0 data-[size=default]:h-11', className)}
       >
         <SelectValue>
-          {options.find((option) => option.value === value)?.label ??
-            placeholder}
+          {selected ? <OptionLabel {...selected} /> : placeholder}
         </SelectValue>
       </SelectTrigger>
       <SelectContent align="start" alignItemWithTrigger={false}>
@@ -66,7 +79,7 @@ export function FormSelect({
               value={option.value}
               disabled={option.disabled}
             >
-              {option.label}
+              <OptionLabel {...option} />
             </SelectItem>
           ))}
         </SelectGroup>

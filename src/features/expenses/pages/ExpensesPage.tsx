@@ -32,6 +32,7 @@ import {
   userId as participantId,
 } from '@/lib/format';
 import { splitLabels } from '@/lib/finance/types';
+import { expenseCategoryIcons } from '../lib/category-icons';
 import { expenseCategories } from '../types';
 import { currencyMoney } from '@/lib/finance/money';
 import { apiMessage } from '@/services/api-error';
@@ -266,6 +267,7 @@ function GroupExpenses({ group }: { group: Group }) {
                   ...expenseCategories.map((value) => ({
                     value,
                     label: categoryLabel(value),
+                    icon: expenseCategoryIcons[value],
                   })),
                 ]}
               />

@@ -234,6 +234,7 @@ export default function RecordSettlementDialog({
             <DialogFooter>
               {!frozen && (
                 <Button
+                  size="xl"
                   variant="outline"
                   disabled={busy}
                   onClick={() => setReview(false)}
@@ -243,6 +244,7 @@ export default function RecordSettlementDialog({
               )}
               {frozen && !uncertain && (
                 <Button
+                  size="xl"
                   variant="outline"
                   disabled={busy}
                   onClick={async () => {
@@ -264,7 +266,7 @@ export default function RecordSettlementDialog({
                   Review updated repayments
                 </Button>
               )}
-              <Button disabled={busy} onClick={confirm}>
+              <Button size="xl" disabled={busy} onClick={confirm}>
                 {busy && (
                   <Spinner data-icon="inline-start" aria-hidden="true" />
                 )}
@@ -361,6 +363,7 @@ export default function RecordSettlementDialog({
             )}
             <DialogFooter>
               <Button
+                size="xl"
                 type="button"
                 variant="outline"
                 disabled={busy}
@@ -368,7 +371,7 @@ export default function RecordSettlementDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={busy}>
+              <Button size="xl" type="submit" disabled={busy}>
                 {busy ? 'Checking…' : 'Review payment'}
               </Button>
             </DialogFooter>

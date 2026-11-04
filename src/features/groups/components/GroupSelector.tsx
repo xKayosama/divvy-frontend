@@ -1,4 +1,5 @@
-import { ChevronsUpDown, LayoutGrid, LoaderCircle, Users } from 'lucide-react';
+import { createElement } from 'react';
+import { ChevronsUpDown, LayoutGrid, LoaderCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -17,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar-context';
 import { useGetGroupsQuery } from '@/features/groups/groupApi';
 import { setSelectedGroup } from '@/features/groups/groupSlice';
+import { resolveGroupIcon } from '../lib/group-icons';
 
 const GroupSelector = () => {
   const dispatch = useAppDispatch();
@@ -25,6 +27,8 @@ const GroupSelector = () => {
   const selectedGroup = useAppSelector((state) => state.groups.selectedGroup);
   const { data, isLoading, isError, isFetching, refetch } = useGetGroupsQuery();
   const groups = data?.data.groups ?? [];
+  const listedGroup = groups.find((group) => group.id === selectedGroup?.id);
+  const selectedIcon = resolveGroupIcon(listedGroup?.icon ?? selectedGroup?.icon);
 
   return (
     <div className="min-w-0">
@@ -39,7 +43,11 @@ const GroupSelector = () => {
           aria-label="Switch group"
         >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-            {isLoading ? <LoaderCircle className="animate-spin" /> : <Users />}
+            {isLoading ? (
+              <LoaderCircle aria-hidden="true" className="animate-spin" />
+            ) : (
+              createElement(selectedIcon, { 'aria-hidden': true })
+            )}
           </span>
           <span className="grid min-w-0 gap-0.5 text-left">
             <span className="truncate font-semibold">
@@ -88,7 +96,9 @@ const GroupSelector = () => {
                   className="gap-3 py-2"
                 >
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border">
-                    <Users aria-hidden="true" />
+                    {createElement(resolveGroupIcon(group.icon), {
+                      'aria-hidden': true,
+                    })}
                   </span>
                   <span className="min-w-0 flex-1 truncate">{group.name}</span>
                 </DropdownMenuRadioItem>

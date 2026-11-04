@@ -127,7 +127,7 @@ export default function InviteMemberDialog({
               </p>
             )}
             <DialogFooter>
-              <Button onClick={onClose}>Done</Button>
+              <Button size="xl" onClick={onClose}>Done</Button>
             </DialogFooter>
           </div>
         ) : (
@@ -175,6 +175,7 @@ export default function InviteMemberDialog({
             )}
             <DialogFooter>
               <Button
+                size="xl"
                 type="button"
                 variant="outline"
                 disabled={isLoading}
@@ -182,7 +183,7 @@ export default function InviteMemberDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button size="xl" type="submit" disabled={isLoading}>
                 {isLoading && (
                   <Spinner data-icon="inline-start" aria-hidden="true" />
                 )}

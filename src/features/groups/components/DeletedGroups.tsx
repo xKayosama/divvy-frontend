@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -55,6 +56,7 @@ export default function DeletedGroups() {
           aria-expanded={expanded}
           aria-controls="deleted-groups"
         >
+          <Trash2 data-icon="inline-start" aria-hidden="true" />
           {expanded ? 'Hide deleted groups' : 'Deleted groups'}
         </Button>
       </div>
@@ -128,13 +130,14 @@ export default function DeletedGroups() {
           )}
           <DialogFooter>
             <Button
+              size="xl"
               variant="outline"
               disabled={state.isLoading}
               onClick={() => setSelected(null)}
             >
               Cancel
             </Button>
-            <Button disabled={state.isLoading} onClick={submit}>
+            <Button size="xl" disabled={state.isLoading} onClick={submit}>
               {state.isLoading ? 'Restoring…' : 'Restore group'}
             </Button>
           </DialogFooter>

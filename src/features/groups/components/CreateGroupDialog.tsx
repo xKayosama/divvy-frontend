@@ -14,12 +14,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useCreateGroupMutation } from '../groupApi';
+import { groupIconOptions } from '../lib/group-icons';
 import currencies from '../currencies.json';
 
 export default function CreateGroupDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState('PHP');
+  const [icon, setIcon] = useState('people');
   const [message, setMessage] = useState('');
   const [create, { isLoading }] = useCreateGroupMutation();
   async function submit(event: React.FormEvent) {
@@ -27,11 +29,12 @@ export default function CreateGroupDialog() {
     if (isLoading || !name.trim()) return;
     setMessage('');
     try {
-      await create({ name: name.trim(), currency }).unwrap();
+      await create({ name: name.trim(), currency, icon }).unwrap();
       toast.add({ title: 'Group created.', type: 'success' });
       setOpen(false);
       setName('');
       setCurrency('PHP');
+      setIcon('people');
     } catch (error) {
       const detail = error as { data?: { message?: string } };
       setMessage(
@@ -94,6 +97,16 @@ export default function CreateGroupDialog() {
                 financial activity.
               </p>
             </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="create-group-icon">Group icon</Label>
+              <FormSelect
+                id="create-group-icon"
+                value={icon}
+                onValueChange={setIcon}
+                disabled={isLoading}
+                options={groupIconOptions}
+              />
+            </div>
             {message && (
               <p role="alert" className="text-sm text-destructive">
                 {message}
@@ -101,6 +114,7 @@ export default function CreateGroupDialog() {
             )}
             <div className="flex justify-end gap-2">
               <Button
+                size="xl"
                 type="button"
                 variant="outline"
                 disabled={isLoading}
@@ -108,7 +122,7 @@ export default function CreateGroupDialog() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || !name.trim()}>
+              <Button size="xl" type="submit" disabled={isLoading || !name.trim()}>
                 {isLoading && (
                   <Spinner data-icon="inline-start" aria-hidden="true" />
                 )}

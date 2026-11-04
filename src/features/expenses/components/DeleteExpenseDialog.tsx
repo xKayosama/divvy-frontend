@@ -72,6 +72,7 @@ export default function DeleteExpenseDialog({
         )}
         <div className="flex justify-end gap-2">
           <AlertDialogCancel
+            size="xl"
             variant="outline"
             disabled={isLoading}
             onClick={onClose}
@@ -79,6 +80,7 @@ export default function DeleteExpenseDialog({
             Keep expense
           </AlertDialogCancel>
           <AlertDialogAction
+            size="xl"
             variant="destructive"
             disabled={isLoading || !!expense.billId}
             onClick={submit}

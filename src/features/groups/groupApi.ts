@@ -8,7 +8,7 @@ export const groupApi = api.injectEndpoints({
     }),
     createGroup: builder.mutation<
       { data: { group: { _id: string } } },
-      { name: string; currency: string }
+      { name: string; currency: string; icon?: string }
     >({
       query: (body) => ({ url: '/groups', method: 'POST', body }),
       invalidatesTags: ['Group'],

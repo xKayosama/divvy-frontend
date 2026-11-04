@@ -17,6 +17,7 @@ import { todayDate } from '@/lib/date';
 import { formatLabel as categoryLabel } from '@/lib/format';
 import type { Frequency } from '@/lib/finance/types';
 import { useCreateBillMutation, useUpdateBillMutation } from '../billApi';
+import { billCategoryIcons } from '../lib/category-icons';
 import { billCategories } from '../types';
 import type { Bill, BillCategory, BillPayload } from '../types';
 import { billState } from '../lib/bill-state';
@@ -179,6 +180,7 @@ export default function BillFormDialog({
                     options={billCategories.map((value) => ({
                       value,
                       label: categoryLabel(value),
+                      icon: billCategoryIcons[value],
                     }))}
                   />
                 </div>

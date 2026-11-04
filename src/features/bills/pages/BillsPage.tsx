@@ -19,6 +19,7 @@ import { apiMessage } from '@/services/api-error';
 import { formatDate } from '@/lib/date';
 import ExpenseDetailsDialog from '@/features/expenses/components/ExpenseDetailsDialog';
 import { useGetBillsQuery } from '../billApi';
+import { billCategoryIcons } from '../lib/category-icons';
 import { billCategories } from '../types';
 import type { Bill, BillView, BillSort } from '../types';
 import { billState, defaultBillFilters } from '../lib/bill-state';
@@ -201,6 +202,7 @@ function GroupBills({
                     ...billCategories.map((value) => ({
                       value,
                       label: categoryLabel(value),
+                      icon: billCategoryIcons[value],
                     })),
                   ]}
                 />

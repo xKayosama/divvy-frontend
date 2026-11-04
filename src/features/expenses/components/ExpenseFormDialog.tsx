@@ -25,6 +25,7 @@ import {
   personName,
 } from '@/lib/format';
 import { splitLabels } from '@/lib/finance/types';
+import { expenseCategoryIcons } from '../lib/category-icons';
 import { expenseCategories } from '../types';
 import type {
   Expense,
@@ -404,6 +405,7 @@ function ExpenseForm({
                   options={expenseCategories.map((value) => ({
                     value,
                     label: categoryLabel(value),
+                    icon: expenseCategoryIcons[value],
                   }))}
                 />
               </div>
@@ -799,6 +801,7 @@ function ExpenseForm({
           <Button
             type="button"
             variant="outline"
+            size="xl"
             disabled={saving}
             onClick={onClose}
           >
@@ -806,8 +809,8 @@ function ExpenseForm({
           </Button>
           <Button
             type="submit"
+            size="xl"
             disabled={saving || !members.length || !!expense?.billId}
-            className="h-10 px-5"
           >
             {saving && <Spinner data-icon="inline-start" aria-hidden="true" />}
             {saving ? 'Saving…' : expense ? 'Save changes' : 'Add expense'}

@@ -142,6 +142,7 @@ export default function RespondInvitationDialog({
           )}
           <DialogFooter>
             <Button
+              size="xl"
               type="button"
               variant="outline"
               disabled={isLoading}
@@ -150,11 +151,12 @@ export default function RespondInvitationDialog({
               Cancel
             </Button>
             {stale ? (
-              <Button type="button" onClick={onRefresh}>
+              <Button size="xl" type="button" onClick={onRefresh}>
                 Refresh invitations
               </Button>
             ) : (
               <Button
+                size="xl"
                 type="submit"
                 variant={accepting ? 'default' : 'destructive'}
                 disabled={isLoading}

@@ -2,6 +2,7 @@ export interface Group {
   id: string;
   name: string;
   currency: string;
+  icon?: string;
   role: string;
   owner: {
     _id: string;

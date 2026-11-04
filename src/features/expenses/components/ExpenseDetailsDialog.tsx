@@ -223,12 +223,13 @@ export default function ExpenseDetailsDialog({
           )}
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t p-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button size="xl" variant="outline" onClick={onClose}>
             Close
           </Button>
           {expense && !expense.billId && !error && (
             <>
               <Button
+                size="xl"
                 variant="destructive"
                 disabled={isFetching}
                 onClick={() => onDelete(expense)}
@@ -236,7 +237,7 @@ export default function ExpenseDetailsDialog({
                 <Trash2 className="size-4" />
                 Delete
               </Button>
-              <Button disabled={isFetching} onClick={() => onEdit(expense)}>
+              <Button size="xl" disabled={isFetching} onClick={() => onEdit(expense)}>
                 <Pencil className="size-4" />
                 Edit expense
               </Button>

@@ -3,9 +3,9 @@ import { ContentSkeleton } from '@/components/shell/ContentSkeleton';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { Brand } from '@/components/brand/Brand';
-import { useState } from 'react';
+import { createElement, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Search, Users, Wallet } from 'lucide-react';
+import { ArrowUpRight, Coins, Mail, Search, Users, Wallet } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setSelectedGroup } from '@/features/groups/groupSlice';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,9 @@ import { Input } from '@/components/ui/input';
 import LogoutButton from '@/features/auth/components/LogoutButton';
 import DeletedGroups from '../components/DeletedGroups';
 import CreateGroupDialog from '../components/CreateGroupDialog';
+import GroupSettlementTotals from '../components/GroupSettlementTotals';
 import { useGetGroupsQuery } from '../groupApi';
+import { resolveGroupIcon } from '../lib/group-icons';
 
 export default function GroupsPage() {
   const { data, isLoading, isError, refetch } = useGetGroupsQuery();
@@ -35,9 +37,11 @@ export default function GroupsPage() {
             <NotificationBell />
             <Link
               to="/invitations"
-              className={buttonVariants({ variant: 'outline' })}
+              aria-label="Invitations"
+              title="Invitations"
+              className={buttonVariants({ variant: 'outline', size: 'icon' })}
             >
-              Invitations
+              <Mail aria-hidden="true" />
             </Link>
             <LogoutButton />
           </div>
@@ -129,16 +133,21 @@ export default function GroupsPage() {
               >
                 <div className="mb-7 flex items-center justify-between">
                   <span className="grid size-12 place-items-center rounded-2xl bg-secondary text-primary">
-                    <Users className="size-6" />
+                    {createElement(resolveGroupIcon(group.icon), {
+                      'aria-hidden': true,
+                      className: 'size-6',
+                    })}
                   </span>
                   <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary">
                     {group.role === 'OWNER' ? 'Owner' : 'Member'}
                   </span>
                 </div>
                 <h3 className="truncate text-xl font-semibold">{group.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Coins aria-hidden="true" className="size-4 shrink-0" />
                   {group.currency} · Shared expenses
                 </p>
+                {user && <GroupSettlementTotals group={group} userId={user._id} />}
                 <div className="mt-6 flex items-center justify-between border-t pt-4 text-sm font-medium text-primary">
                   Open group
                   <ArrowUpRight className="size-5 transition group-hover:translate-x-1" />
