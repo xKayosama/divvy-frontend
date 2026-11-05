@@ -1,3 +1,4 @@
+import { RecordAttachment } from '@/features/attachments/components/RecordAttachment';
 import { FileText, Pencil, Repeat2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -79,6 +80,7 @@ export default function BillDetailsDialog({
             <p role="status">Loading bill…</p>
           ) : (
             <>
+              <RecordAttachment kind="bills" id={bill._id} />
               <section className="rounded-2xl bg-brand-spending p-5 text-white">
                 <div className="flex justify-between gap-3">
                   <p className="text-xs uppercase tracking-wider text-accent">

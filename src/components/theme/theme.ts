@@ -9,9 +9,9 @@ function readTheme(): Theme {
     const value = localStorage.getItem(storageKey);
     if (value === 'light' || value === 'dark') return value;
   } catch {
-    /* Keep the light default when storage is unavailable. */
+    /* Keep the dark default when storage is unavailable. */
   }
-  return 'light';
+  return 'dark';
 }
 
 let theme = readTheme();

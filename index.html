@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#087F65" />
     <script>
-      // Apply the saved preference before the first paint.
-      let dark = false;
+      // Default to dark and apply any saved preference before the first paint.
+      let dark = true;
       try {
-        dark = localStorage.getItem('divvy.theme') === 'dark';
+        dark = localStorage.getItem('divvy.theme') !== 'light';
       } catch {
-        // Use light mode when storage is unavailable.
+        // Use dark mode when storage is unavailable.
       }
       document.documentElement.classList.toggle('dark', dark);
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light';

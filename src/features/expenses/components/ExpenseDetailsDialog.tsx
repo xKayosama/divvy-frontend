@@ -1,3 +1,4 @@
+import { RecordAttachment } from '@/features/attachments/components/RecordAttachment';
 import RecurringExpenseSchedule from './RecurringExpenseSchedule';
 import { Pencil, Trash2, Repeat2, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,6 +81,7 @@ export default function ExpenseDetailsDialog({
             <p role="status">Loading expense…</p>
           ) : (
             <>
+              <RecordAttachment kind="expenses" id={expense._id} />
               <section className="rounded-2xl bg-brand-spending p-5 text-white">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

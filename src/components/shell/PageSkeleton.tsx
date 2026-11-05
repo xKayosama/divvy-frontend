@@ -31,8 +31,8 @@ function SummarySkeleton() {
           key={card}
           className="flex flex-col gap-5 rounded-2xl border bg-card p-5"
         >
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-8 w-36" />
+          <Skeleton className="h-4 w-28 max-w-full" />
+          <Skeleton className="h-8 w-36 max-w-full" />
           <Skeleton className="h-4 w-40 max-w-full" />
         </div>
       ))}
@@ -145,12 +145,12 @@ export function PageSkeleton() {
               aria-hidden="true"
               className="flex flex-wrap items-end justify-between gap-4"
             >
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <Skeleton className="h-3 w-28" />
-                <Skeleton className="h-9 w-52" />
+              <div className="flex min-w-0 flex-1 basis-64 flex-col gap-2">
+                <Skeleton className="h-3 w-28 max-w-full" />
+                <Skeleton className="h-9 w-52 max-w-full" />
                 <Skeleton className="h-5 w-full max-w-lg" />
               </div>
-              <Skeleton className="h-11 w-40" />
+              <Skeleton className="h-11 w-40 max-w-full" />
             </div>
             {groups ? (
               <>

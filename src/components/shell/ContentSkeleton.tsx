@@ -37,7 +37,7 @@ export function ContentSkeleton({
               <div className="flex min-w-0 flex-1 flex-col gap-3">
                 <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="h-4 w-full max-w-64" />
-                {layout === 'cards' && <Skeleton className="mt-3 h-4 w-24" />}
+                {layout === 'cards' && <Skeleton className="mt-3 h-4 w-24 max-w-full" />}
               </div>
             </div>
           ))}

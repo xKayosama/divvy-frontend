@@ -4,7 +4,7 @@ import { useRef, useState, type FormEvent } from 'react';
 
 import { useAppDispatch } from '@/app/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserCircle } from 'lucide-react';
+import { Camera, Trash2, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -36,7 +36,8 @@ export default function ProfileDialog({
 }) {
   const dispatch = useAppDispatch();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
-  const [updateAvatar, { isLoading: isUpdatingAvatar }] = useUpdateAvatarMutation();
+  const [updateAvatar, { isLoading: isUpdatingAvatar }] =
+    useUpdateAvatarMutation();
   const photoInput = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState('');
   const busy = isLoading || isUpdatingAvatar;
@@ -89,8 +90,12 @@ export default function ProfileDialog({
   async function changePhoto(file: File | null) {
     if (busy) return;
     setPhotoError('');
-    if (file && (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size === 0 || file.size > 5 * 1024 * 1024)) {
+    if (
+      file &&
+      (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+        file.size === 0 ||
+        file.size > 5 * 1024 * 1024)
+    ) {
       setPhotoError('Choose a JPEG, PNG, or WebP image up to 5 MB.');
       return;
     }
@@ -99,9 +104,17 @@ export default function ProfileDialog({
       const { data } = await updateAvatar(file).unwrap();
       if (!token || token !== getStoredToken()) return;
       dispatch(setUser({ ...user, avatar: data.user.avatar ?? null }));
-      toast.add({ title: file ? 'Profile photo updated.' : 'Profile photo removed.', type: 'success' });
+      toast.add({
+        title: file ? 'Profile photo updated.' : 'Profile photo removed.',
+        type: 'success',
+      });
     } catch (cause) {
-      setPhotoError(apiMessage(cause, 'Could not update your profile photo. Please try again.'));
+      setPhotoError(
+        apiMessage(
+          cause,
+          'Could not update your profile photo. Please try again.',
+        ),
+      );
     }
   }
 
@@ -112,7 +125,10 @@ export default function ProfileDialog({
         if (!open && !busy) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md"
+        showCloseButton={!busy}
+      >
         <DialogHeader>
           <DialogTitle>Your profile</DialogTitle>
           <DialogDescription>
@@ -126,32 +142,56 @@ export default function ProfileDialog({
           aria-busy={busy}
         >
           <FieldGroup>
-            <Field>
-              <div className="flex flex-wrap items-center gap-3">
-                <Avatar size="lg" aria-hidden="true">
+            <Field className="gap-3 rounded-2xl border border-border bg-muted/40 p-4">
+              <div className="flex items-center gap-4">
+                <Avatar aria-hidden="true" className="size-16">
                   <AvatarImage src={user.avatar ?? undefined} alt="" />
-                  <AvatarFallback><UserCircle className="size-5" /></AvatarFallback>
+                  <AvatarFallback>
+                    <UserCircle className="size-7" />
+                  </AvatarFallback>
                 </Avatar>
-                <input
-                  ref={photoInput}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  hidden
-                  disabled={busy}
-                  onChange={(event) => {
-                    const file = event.currentTarget.files?.[0];
-                    event.currentTarget.value = '';
-                    if (file) void changePhoto(file);
-                  }}
-                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">Profile photo</p>
+                  <p
+                    id="profile-photo-help"
+                    className="mt-1 text-xs leading-5 text-muted-foreground"
+                  >
+                    JPEG, PNG, or WebP up to 5 MB. Photo changes save
+                    immediately.
+                  </p>
+                </div>
+              </div>
+              <input
+                ref={photoInput}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                disabled={busy}
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = '';
+                  if (file) void changePhoto(file);
+                }}
+              />
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="xl"
                   disabled={busy}
+                  aria-describedby="profile-photo-help"
                   onClick={() => photoInput.current?.click()}
                 >
-                  {isUpdatingAvatar ? 'Updating photo…' : 'Change photo'}
+                  {isUpdatingAvatar ? (
+                    <Spinner data-icon="inline-start" aria-hidden="true" />
+                  ) : (
+                    <Camera data-icon="inline-start" aria-hidden="true" />
+                  )}
+                  {isUpdatingAvatar
+                    ? 'Updating photo…'
+                    : user.avatar
+                      ? 'Change photo'
+                      : 'Add photo'}
                 </Button>
                 {user.avatar && (
                   <Button
@@ -161,6 +201,7 @@ export default function ProfileDialog({
                     disabled={busy}
                     onClick={() => void changePhoto(null)}
                   >
+                    <Trash2 data-icon="inline-start" aria-hidden="true" />
                     Remove photo
                   </Button>
                 )}
@@ -196,10 +237,7 @@ export default function ProfileDialog({
                 </FieldError>
               )}
             </Field>
-            <Field
-              data-disabled={busy}
-              data-invalid={attempted && lastInvalid}
-            >
+            <Field data-disabled={busy} data-invalid={attempted && lastInvalid}>
               <FieldLabel htmlFor="profile-last-name">Last name</FieldLabel>
               <Input
                 id="profile-last-name"
