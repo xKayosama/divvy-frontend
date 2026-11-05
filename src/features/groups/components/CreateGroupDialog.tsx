@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { useCreateGroupMutation } from '../groupApi';
 import { groupIconOptions } from '../lib/group-icons';
-import currencies from '../currencies.json';
+import { currencyOptions } from '../lib/currency-options';
 
 export default function CreateGroupDialog() {
   const [open, setOpen] = useState(false);
@@ -90,7 +90,7 @@ export default function CreateGroupDialog() {
                 value={currency}
                 onValueChange={setCurrency}
                 disabled={isLoading}
-                options={currencies.map((value) => ({ value, label: value }))}
+                options={currencyOptions}
               />
               <p className="text-xs leading-5 text-muted-foreground">
                 Choose carefully. Currency can only change before the group has

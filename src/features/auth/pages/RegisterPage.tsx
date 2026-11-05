@@ -1,7 +1,5 @@
 import { Spinner } from '@/components/ui/spinner';
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import SignupVerification from '../components/SignupVerification';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
@@ -19,11 +17,6 @@ import { normalizedEmail, registrationErrors } from '../lib/account-form';
 import AccountCard from '../components/AccountCard';
 import PasswordField from '../components/PasswordField';
 export default function RegisterPage() {
-  const location = useLocation();
-  const [verificationEmail, setVerificationEmail] = useState<string>(
-    location.state?.verificationEmail || '',
-  );
-  const [notice, setNotice] = useState('');
   const [values, setValues] = useState({
     firstName: '',
     lastName: '',
@@ -48,15 +41,14 @@ export default function RegisterPage() {
     setError('');
     if (Object.values(next).some(Boolean)) return;
     try {
-      const result = await register({
+      await register({
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
         email: normalizedEmail(values.email),
         password: values.password,
       }).unwrap();
       setValues((current) => ({ ...current, password: '', confirmation: '' }));
-      setVerificationEmail(normalizedEmail(values.email));
-      setNotice(result.message);
+      setComplete(true);
     } catch (caught) {
       setError(
         apiMessage(caught, 'Could not create your account. Please try again.'),
@@ -65,19 +57,11 @@ export default function RegisterPage() {
   }
   return (
     <AccountCard
-      title={
-        complete
-          ? 'Your account is ready'
-          : verificationEmail
-            ? 'Verify your email'
-            : 'Create an account'
-      }
+      title={complete ? 'Your account is ready' : 'Create an account'}
       description={
         complete
           ? 'Sign in to start sharing expenses with your groups.'
-          : verificationEmail
-            ? 'Confirm your email address to finish creating your account.'
-            : 'For friends, trips and everyone sharing costs.'
+          : 'For friends, trips and everyone sharing costs.'
       }
       footer={
         <Link
@@ -90,14 +74,6 @@ export default function RegisterPage() {
     >
       {complete ? (
         <p role="status">Account created successfully. You can now sign in.</p>
-      ) : verificationEmail ? (
-        <div className="flex flex-col gap-5">
-          {notice && <p role="status">{notice}</p>}
-          <SignupVerification
-            email={verificationEmail}
-            onVerified={() => setComplete(true)}
-          />
-        </div>
       ) : (
         <form
           onSubmit={submit}

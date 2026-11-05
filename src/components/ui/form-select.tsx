@@ -12,6 +12,7 @@ interface SelectOption {
   value: string;
   label: string;
   icon?: LucideIcon;
+  decorativeText?: string;
   disabled?: boolean;
 }
 interface FormSelectProps {
@@ -26,11 +27,12 @@ interface FormSelectProps {
   placeholder?: string;
   className?: string;
 }
-function OptionLabel({ label, icon: Icon }: SelectOption) {
-  if (!Icon) return label;
+function OptionLabel({ label, icon: Icon, decorativeText }: SelectOption) {
+  if (!Icon && !decorativeText) return label;
   return (
     <span className="flex min-w-0 items-center gap-2">
-      <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
+      {Icon && <Icon aria-hidden="true" className="size-4 text-muted-foreground" />}
+      {decorativeText && <span aria-hidden="true">{decorativeText}</span>}
       <span className="truncate">{label}</span>
     </span>
   );

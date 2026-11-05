@@ -41,7 +41,7 @@ import {
   useSoftDeleteGroupMutation,
   type GroupDetails,
 } from '../settingsApi';
-import currencies from '../currencies.json';
+import { currencyOptions } from '../lib/currency-options';
 import GroupActivity from '../components/GroupActivity';
 export default function GroupSettingsPage() {
   const group = useAppSelector((state) => state.groups.selectedGroup);
@@ -200,7 +200,7 @@ function SettingsForm({
                   value={currency}
                   onValueChange={setCurrency}
                   disabled={!owner || busy || !details.canChangeCurrency}
-                  options={currencies.map((value) => ({ value, label: value }))}
+                  options={currencyOptions}
                 />
                 <FieldDescription>
                   Currency can only change before expenses, bills or payments
